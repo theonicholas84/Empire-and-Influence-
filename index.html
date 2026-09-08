@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empire & Influence — v0.2</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div id="game">
+<header class="topbar">
+  <div class="brand">EMPIRE <span>&</span> INFLUENCE <small>1900 • GRAND STRATEGY</small></div>
+  <div class="resources"><div>💰 <b id="cash">$100,000</b><small> TREASURY</small></div><div>📈 <b id="income">$0</b><small>/QUARTER</small></div><div>⚖ <b id="influence">10</b><small> INFLUENCE</small></div></div>
+  <div class="time"><b id="date">1900 Q1</b><button id="pause">Ⅱ</button><button id="speed">▶</button></div>
+</header>
+<div class="layout">
+  <section class="mapwrap">
+    <canvas id="map"></canvas>
+    <div class="maptools"><button id="zoomIn">＋</button><button id="zoomOut">－</button><button id="reset">⌖</button></div>
+    <div class="maptitle">THE OLD WORLD <small>ECONOMIC SPHERE</small></div>
+    <div class="ticker" id="ticker">MARKET OPEN • WORLD TRADE IS STABLE</div>
+  </section>
+  <aside class="panel">
+    <div class="panelhead"><span id="panelType">WORLD</span><button id="close">×</button></div>
+    <div id="panelBody"><h1>Build your empire.</h1><p>Click a country, city, company, railway or ship. The world keeps moving while you make your fortune.</p><hr><b>QUICK START</b><p class="muted">Invest in a resource-rich country, then expand its industry and capture the trade route.</p></div>
+  </aside>
+</div>
+<nav class="bottom">
+<button data-tab="companies">🏭 COMPANIES</button><button data-tab="market">📈 MARKET</button><button data-tab="politics">🏛 POLITICS</button><button data-tab="world">🌍 WORLD</button>
+</nav>
+</div><script src="game.js"></script></body></html>
