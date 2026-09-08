@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Empire & Influence</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>EMPIRE & INFLUENCE</h1>
+      <small>Economic Grand Strategy • Prototype v0.1</small>
+    </div>
+    <div id="clock">Year 1900 • Q1</div>
+  </header>
+
+  <main>
+    <section class="world">
+      <div class="map" id="map"></div>
+      <div class="legend">
+        <span>🛢️ Minyak</span><span>⛏️ Besi</span><span>🌾 Pangan</span><span>🏭 Industri</span>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h2>Empire</h2>
+        <div class="stats">
+          <b>Cash <span id="cash">$100,000</span></b>
+          <b>Income <span id="income">$0/q</span></b>
+          <b>Influence <span id="influence">10</span></b>
+          <b>Reputation <span id="rep">70</span></b>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="countryName">Select a country</h2>
+        <p id="countryInfo">Klik wilayah di peta untuk melihat peluang investasi.</p>
+        <div id="actions"></div>
+      </div>
+
+      <div class="card">
+        <h2>Market</h2>
+        <div id="market"></div>
+      </div>
+
+      <div class="card">
+        <h2>News</h2>
+        <div id="log" class="log"></div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
