@@ -1,23 +1,26 @@
 /* ===================================================
-   URZIKSTAN — Cold War Dictator Engine (1960 Edition)
+   URZIKSTAN — State Manager Engine (FM & Victoria Style)
    =================================================== */
 
+const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
+
 const INITIAL_STATE = {
+  day: 1,
+  monthIndex: 0,
   year: 1960,
-  treasury: 100000000, // $100M
+  
+  treasury: 100000000,
   oilLevel: 1,
   nukeProgress: 0,
   coupThreat: 0,
   unSanctions: 0,
   
-  // Cult & Loyalty Metrics
   cultOfPersonality: 10,
   loyaltyMilitary: 70,
   loyaltyPeople: 50,
   
-  // Real World Superpowers
-  relUSA: 50,  // 0-100
-  relUSSR: 50, // 0-100
+  relUSA: 50,
+  relUSSR: 50,
 
   activeEvent: null,
   lastUpdate: Date.now(),
@@ -28,7 +31,7 @@ let game = JSON.parse(JSON.stringify(INITIAL_STATE));
 
 function formatMoney(val) {
   if (val >= 1e9) return "$" + (val / 1e9).toFixed(2) + "B";
-  if (val >= 1e6) return "$" + (val / 1e6).toFixed(0) + "M";
+  if (val >= 1e6) return "$" + (val / 1e6).toFixed(1) + "M";
   return "$" + Math.floor(val).toLocaleString();
 }
 
@@ -41,57 +44,61 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-// --- Main Engine Loop ---
+// --- Main Engine ---
 function gameLoop() {
   const now = Date.now();
   const elapsed = (now - game.lastUpdate) / 1000;
   game.lastUpdate = now;
 
-  // Waktu Berjalan (1 Tahun = ~60 Detik)
-  game.year += (elapsed / 60);
-
-  // Pendapatan Minyak (Nol jika Kena Embargo PBB 100%)
-  let oilRevenue = game.oilLevel * 10000000;
-  if (game.unSanctions >= 100) {
-    oilRevenue = 0; // Total Embargo!
-  } else {
-    oilRevenue *= (1 - (game.unSanctions / 100)); // Terpangkas Sanksi
+  // Kalender Style FM
+  game.day += elapsed * 3; // 1 detik = 3 hari
+  if (game.day >= 30) {
+    game.day = 1;
+    game.monthIndex++;
+    if (game.monthIndex >= 12) {
+      game.monthIndex = 0;
+      game.year++;
+    }
   }
-  game.treasury += oilRevenue * elapsed;
 
-  // Akumulasi Ancaman Kudeta (Ditekan oleh Kultus Kepribadian)
+  // Finansial & Minyak
+  let oilIncome = game.oilLevel * 10000000;
+  if (game.unSanctions >= 100) {
+    oilIncome = 0;
+  } else {
+    oilIncome *= (1 - (game.unSanctions / 100));
+  }
+  game.treasury += oilIncome * elapsed;
+
+  // Akumulasi Kudeta
   let threatGain = 0;
-  if (game.loyaltyMilitary < 40) threatGain += 2.5;
-  if (game.loyaltyPeople < 30) threatGain += 3.5;
-  
-  // Kultus Kepribadian meredam kemarahan rakyat
-  threatGain -= (game.cultOfPersonality * 0.03);
+  if (game.loyaltyMilitary < 40) threatGain += 2.0;
+  if (game.loyaltyPeople < 30) threatGain += 3.0;
+  threatGain -= (game.cultOfPersonality * 0.02);
   if (threatGain < 0) threatGain = 0;
 
   game.coupThreat += threatGain * elapsed;
 
-  // Random Insurgency Event Trigger (Setiap 25-40 detik)
-  if (now - game.lastEventCheck > 30000 && !game.activeEvent) {
+  // Random Events (Milisi & Spionase)
+  if (now - game.lastEventCheck > 25000 && !game.activeEvent) {
     game.lastEventCheck = now;
-    if (Math.random() < 0.6) {
-      triggerRandomEvent();
-    }
+    if (Math.random() < 0.5) triggerRandomEvent();
   }
 
-  // Check Game Over Condition
+  // Check Game Over
   if (game.coupThreat >= 100) {
-    triggerGameOver("REVOLUSI TOTAL! Militer & Pemberontak menggulingkan rezim Anda.");
+    triggerGameOver("REVOLUSI TOTAL! Militer dan kelompok oposisi merebut Istana.");
     return;
   }
 
   updateUI();
 }
 
-// --- Random Event System (Milisi & Pemberontak) ---
+// --- Events ---
 const EVENTS = [
   {
-    title: "⚠️ SERANGAN MILISI AL-QATALA!",
-    desc: "Kelompok pemberontak merebut kilang minyak utama Urzikstan.",
+    title: "⚠️ PEMBERONTAKAN MILISI AL-QATALA!",
+    desc: "Kelompok milisi merebut ladang minyak Al-Zubair.",
     b1: "Kirim Pasukan Khusus ($20M)",
     b2: "Bayar Tebusan ($50M)",
     b3: "Abaikan Dulu",
@@ -99,39 +106,19 @@ const EVENTS = [
       if (game.treasury >= 20000000) {
         game.treasury -= 20000000;
         game.loyaltyMilitary = Math.min(100, game.loyaltyMilitary + 5);
-        showToast("⚔️ Milisi berhasil ditumpas!");
-      } else { showToast("❌ Dana tidak cukup! Pemberontak makin kuat."); game.coupThreat += 15; }
+        showToast("⚔️ Milisi ditumpas.");
+      } else { showToast("❌ Dana tidak cukup!"); game.coupThreat += 15; }
     },
     r2: () => {
       if (game.treasury >= 50000000) {
         game.treasury -= 50000000;
-        showToast("💰 Tebusan dibayar, kilang aman.");
-      } else { showToast("❌ Uang tidak cukup!"); game.coupThreat += 15; }
+        showToast("💰 Tebusan terbayar.");
+      } else { showToast("❌ Dana tidak cukup!"); game.coupThreat += 15; }
     },
     r3: () => {
       game.coupThreat += 20;
       game.loyaltyPeople = Math.max(0, game.loyaltyPeople - 15);
-      showToast("💥 Pemberontak meledakkan fasilitas minyak!");
-    }
-  },
-  {
-    title: "🕵️ SPIONASE PERANG DINGIN!",
-    desc: "Agen CIA/KGB tertangkap mencoba menyusup ke istana Anda.",
-    b1: "Eksekusi Publik (+Kultus, +Sanksi PBB)",
-    b2: "Tukar Tahanan ($30M Cash)",
-    b3: "Bebaskan Diam-Diam",
-    r1: () => {
-      game.cultOfPersonality = Math.min(100, game.cultOfPersonality + 15);
-      game.unSanctions = Math.min(100, game.unSanctions + 15);
-      showToast("🗿 Eksekusi meningkatkan ketakutan rakyat!");
-    },
-    r2: () => {
-      game.treasury += 30000000;
-      showToast("💰 Uang tebusan agen rahasia diterima.");
-    },
-    r3: () => {
-      game.relUSA = Math.min(100, game.relUSA + 10);
-      showToast("🤝 Hubungan diplomatik sedikit membaik.");
+      showToast("💥 Ladang minyak meledak!");
     }
   }
 ];
@@ -147,100 +134,123 @@ function triggerRandomEvent() {
   document.getElementById("event-modal").classList.remove("hidden");
 }
 
-function resolveEvent(option) {
+function resolveEvent(opt) {
   if (!game.activeEvent) return;
-  if (option === 1) game.activeEvent.r1();
-  if (option === 2) game.activeEvent.r2();
-  if (option === 3) game.activeEvent.r3();
-  
+  if (opt === 1) game.activeEvent.r1();
+  if (opt === 2) game.activeEvent.r2();
+  if (opt === 3) game.activeEvent.r3();
   game.activeEvent = null;
   document.getElementById("event-modal").classList.add("hidden");
 }
 
-// --- Player Actions ---
-function buildStatue() {
-  if (game.treasury >= 80000000) {
-    game.treasury -= 80000000;
-    game.cultOfPersonality = Math.min(100, game.cultOfPersonality + 25);
-    showToast("🗿 Patung emas raksasa berhasil berdiri di alun-alun!");
-  } else { showToast("❌ Dana tidak cukup!"); }
-}
+// --- Action Binding Event Listeners (Fix All Unclickable Buttons) ---
+function initEventListeners() {
+  // Tab Switchers
+  document.querySelectorAll(".fm-nav-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".fm-nav-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+      
+      e.target.classList.add("active");
+      const tabId = e.target.getAttribute("data-tab");
+      document.getElementById(`tab-${tabId}`).classList.add("active");
+    });
+  });
 
-function brainwashEducation() {
-  if (game.treasury >= 50000000) {
-    game.treasury -= 50000000;
-    game.cultOfPersonality = Math.min(100, game.cultOfPersonality + 15);
-    game.loyaltyPeople = Math.min(100, game.loyaltyPeople + 10);
-    showToast("📚 Buku sekolah baru memuja rezim resmi diterbitkan!");
-  } else { showToast("❌ Dana tidak cukup!"); }
-}
+  // Overview Actions
+  document.getElementById("btn-upgrade-oil").onclick = () => {
+    if (game.treasury >= 50000000) {
+      game.treasury -= 50000000;
+      game.oilLevel++;
+      showToast("🛢️ Kilang di-upgrade!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
 
-function upgradeOil() {
-  if (game.treasury >= 50000000) {
-    game.treasury -= 50000000;
-    game.oilLevel += 1;
-    showToast("🛢️ Kilang minyak berhasil di-upgrade!");
-  } else { showToast("❌ Dana tidak cukup!"); }
-}
+  document.getElementById("btn-statue").onclick = () => {
+    if (game.treasury >= 80000000) {
+      game.treasury -= 80000000;
+      game.cultOfPersonality = Math.min(100, game.cultOfPersonality + 25);
+      showToast("🗿 Patung emas berdiri!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
 
-function issueDecree(type) {
-  if (type === 'media' && game.treasury >= 20000000) {
-    game.treasury -= 20000000;
-    game.loyaltyMilitary = Math.min(100, game.loyaltyMilitary + 10);
-    game.loyaltyPeople = Math.max(0, game.loyaltyPeople - 15);
-    game.unSanctions = Math.min(100, game.unSanctions + 10);
-    showToast("📜 Sensor media diberlakukan. PBB mengecam!");
-  } else if (type === 'subsidy' && game.treasury >= 30000000) {
-    game.treasury -= 30000000;
-    game.loyaltyPeople = Math.min(100, game.loyaltyPeople + 20);
-    showToast("🍞 Subsidi dibagikan.");
-  } else if (type === 'purge' && game.treasury >= 50000000) {
-    game.treasury -= 50000000;
-    game.coupThreat = Math.max(0, game.coupThreat - 30);
-    game.loyaltyMilitary = Math.max(0, game.loyaltyMilitary - 20);
-    game.unSanctions = Math.min(100, game.unSanctions + 15);
-    showToast("⚔️ Jenderal pembangkang dieksekusi!");
-  } else { showToast("❌ Kas negara tidak mencukupi!"); }
-}
+  document.getElementById("btn-education").onclick = () => {
+    if (game.treasury >= 50000000) {
+      game.treasury -= 50000000;
+      game.cultOfPersonality = Math.min(100, game.cultOfPersonality + 15);
+      showToast("📚 Doktrin pendidikan diterapkan!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
 
-function bribeUN() {
-  if (game.treasury >= 60000000) {
-    game.treasury -= 60000000;
-    game.unSanctions = Math.max(0, game.unSanctions - 20);
-    showToast("🤝 Diplomat PBB berhasil disuap!");
-  } else { showToast("❌ Butuh $60M untuk menyuap PBB!"); }
-}
-
-function alignSuperpower(power) {
-  if (game.treasury >= 40000000) {
-    game.treasury -= 40000000;
-    if (power === 'usa') {
-      game.relUSA = Math.min(100, game.relUSA + 25);
-      game.relUSSR = Math.max(0, game.relUSSR - 15);
-      game.unSanctions = Math.max(0, game.unSanctions - 10);
-      showToast("🇺🇸 Urzikstan makin dekat dengan Blok Barat!");
-    } else {
-      game.relUSSR = Math.min(100, game.relUSSR + 25);
-      game.relUSA = Math.max(0, game.relUSA - 15);
+  // Laws Actions
+  document.getElementById("btn-decree-media").onclick = () => {
+    if (game.treasury >= 20000000) {
+      game.treasury -= 20000000;
       game.loyaltyMilitary = Math.min(100, game.loyaltyMilitary + 10);
-      showToast("🛠️ Bantuan senjata dari Uni Soviet mendarat!");
-    }
-  } else { showToast("❌ Dana tidak cukup!"); }
-}
+      game.loyaltyPeople = Math.max(0, game.loyaltyPeople - 15);
+      game.unSanctions = Math.min(100, game.unSanctions + 10);
+      showToast("📜 Sensor pers berlaku!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
 
-function developNuke() {
-  if (game.treasury >= 100000000) {
-    game.treasury -= 100000000;
-    game.nukeProgress += 25;
-    game.unSanctions = Math.min(100, game.unSanctions + 25); // PBB Murka
-    
-    if (game.nukeProgress >= 100) {
-      game.nukeProgress = 100;
-      showToast("☢️ URZIKSTAN MENJADI KEKUATAN NUKLIR DUNIA!");
-    } else {
-      showToast("☢️ Uji coba nuklir sukses (+25% Progres, +25% Sanksi PBB)");
-    }
-  } else { showToast("❌ Butuh $100M untuk riset nuklir!"); }
+  document.getElementById("btn-decree-subsidy").onclick = () => {
+    if (game.treasury >= 30000000) {
+      game.treasury -= 30000000;
+      game.loyaltyPeople = Math.min(100, game.loyaltyPeople + 20);
+      showToast("🍞 Subsidi pangan dibagikan!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  document.getElementById("btn-decree-purge").onclick = () => {
+    if (game.treasury >= 50000000) {
+      game.treasury -= 50000000;
+      game.coupThreat = Math.max(0, game.coupThreat - 30);
+      game.loyaltyMilitary = Math.max(0, game.loyaltyMilitary - 20);
+      showToast("⚔️ Pembersihan internal dilakukan!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // Diplomacy Actions
+  document.getElementById("btn-bribe-un").onclick = () => {
+    if (game.treasury >= 60000000) {
+      game.treasury -= 60000000;
+      game.unSanctions = Math.max(0, game.unSanctions - 20);
+      showToast("🤝 Diplomat PBB disuap!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  document.getElementById("btn-align-usa").onclick = () => {
+    if (game.treasury >= 40000000) {
+      game.treasury -= 40000000;
+      game.relUSA = Math.min(100, game.relUSA + 25);
+      showToast("🇺🇸 Aliansi AS diperkuat.");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  document.getElementById("btn-align-ussr").onclick = () => {
+    if (game.treasury >= 40000000) {
+      game.treasury -= 40000000;
+      game.relUSSR = Math.min(100, game.relUSSR + 25);
+      showToast("🛠️ Bantuan senjata Soviet mendarat.");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // Military Action
+  document.getElementById("btn-develop-nuke").onclick = () => {
+    if (game.treasury >= 100000000) {
+      game.treasury -= 100000000;
+      game.nukeProgress += 25;
+      game.unSanctions = Math.min(100, game.unSanctions + 25);
+      showToast("☢️ Riset nuklir maju!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // Modal Events & Reset
+  document.getElementById("ev-btn1").onclick = () => resolveEvent(1);
+  document.getElementById("ev-btn2").onclick = () => resolveEvent(2);
+  document.getElementById("ev-btn3").onclick = () => resolveEvent(3);
+  document.getElementById("btn-reset-go").onclick = resetGame;
+  document.getElementById("btn-hard-reset").onclick = resetGame;
 }
 
 function triggerGameOver(reason) {
@@ -254,50 +264,41 @@ function resetGame() {
   updateUI();
 }
 
-// --- UI Sync Engine ---
+// --- Sync UI ---
 function updateUI() {
-  const currentYear = Math.floor(game.year);
-  document.getElementById("top-year").innerText = `📅 TAHUN: ${currentYear}`;
-  document.getElementById("palace-year").innerText = currentYear;
-
+  document.getElementById("top-date").innerText = `${Math.floor(game.day)} ${MONTHS[game.monthIndex]} ${game.year}`;
   document.getElementById("top-treasury").innerText = formatMoney(game.treasury);
   document.getElementById("top-sanctions").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("top-threat").innerText = `${Math.floor(game.coupThreat)}%`;
 
+  document.getElementById("val-military").innerText = `${game.loyaltyMilitary}%`;
   document.getElementById("bar-military").style.width = `${game.loyaltyMilitary}%`;
-  document.getElementById("text-military").innerText = `${game.loyaltyMilitary}% Loyalitas`;
 
+  document.getElementById("val-people").innerText = `${game.loyaltyPeople}%`;
   document.getElementById("bar-people").style.width = `${game.loyaltyPeople}%`;
-  document.getElementById("text-people").innerText = `${game.loyaltyPeople}% Dukungan`;
 
+  document.getElementById("val-cult").innerText = `${game.cultOfPersonality}%`;
   document.getElementById("bar-cult").style.width = `${game.cultOfPersonality}%`;
-  document.getElementById("text-cult").innerText = `${game.cultOfPersonality}% Cult Status`;
 
+  document.getElementById("pop-mil-sat").innerText = `${game.loyaltyMilitary}%`;
+  document.getElementById("pop-peo-sat").innerText = `${game.loyaltyPeople}%`;
+
+  document.getElementById("oil-lvl-txt").innerText = `Level ${game.oilLevel}`;
+  const incomeRate = game.unSanctions >= 100 ? 0 : (game.oilLevel * 10 * (1 - game.unSanctions/100));
+  document.getElementById("oil-income-txt").innerText = `+$${incomeRate.toFixed(1)}M / dtk`;
+
+  document.getElementById("un-sanctions-text").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("bar-sanctions").style.width = `${game.unSanctions}%`;
-  document.getElementById("un-sanctions-val").innerText = `${Math.floor(game.unSanctions)}%`;
 
+  document.getElementById("nuke-status-txt").innerText = `${game.nukeProgress}%`;
   document.getElementById("bar-nuke").style.width = `${game.nukeProgress}%`;
-  document.getElementById("nuke-status").innerText = `${game.nukeProgress}%`;
 
-  document.getElementById("rel-usa").innerText = game.relUSA > 60 ? "Sekutu" : (game.relUSA < 30 ? "Musuh" : "Netral");
-  document.getElementById("rel-ussr").innerText = game.relUSSR > 60 ? "Sekutu" : (game.relUSSR < 30 ? "Musuh" : "Netral");
-
-  // Status Ekspor Minyak
-  if (game.unSanctions >= 100) {
-    document.getElementById("oil-status-text").innerText = " Pendapatan: $0/dtk (TERKENA EMBARGO TOTAL PBB!)";
-  } else {
-    document.getElementById("oil-status-text").innerText = ` Pendapatan Bersih: +$${(game.oilLevel * 10 * (1 - game.unSanctions/100)).toFixed(1)}M/dtk`;
-  }
-}
-
-function switchTab(tabId) {
-  document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-  document.querySelectorAll(".nav-links li, .nav-item").forEach(el => el.classList.remove("active"));
-
-  document.getElementById(`tab-${tabId}`).classList.add("active");
+  document.getElementById("rel-usa").innerText = game.relUSA > 60 ? "Sekutu" : "Netral";
+  document.getElementById("rel-ussr").innerText = game.relUSSR > 60 ? "Sekutu" : "Netral";
 }
 
 window.onload = () => {
+  initEventListeners();
   setInterval(gameLoop, 1000);
   updateUI();
 };
