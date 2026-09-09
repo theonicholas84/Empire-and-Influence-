@@ -46,6 +46,16 @@ body { background-color: var(--fm-bg-dark); color: var(--text-main); height: 100
 .fm-stat-box .label { font-size: 0.65rem; color: var(--text-muted); display: block; font-weight: 700; }
 .fm-stat-box .value { font-family: var(--font-mono); font-weight: 800; font-size: 0.9rem; }
 
+/* World Event Active Banner */
+.world-event-banner {
+  background: #1E3A8A;
+  color: #93C5FD;
+  border-bottom: 1px solid #3B82F6;
+  padding: 0.4rem 1.5rem;
+  font-size: 0.8rem;
+}
+.world-event-banner.hidden { display: none; }
+
 .fm-body { display: flex; flex: 1; overflow: hidden; }
 
 /* FM Sidebar */
@@ -123,6 +133,7 @@ body { background-color: var(--fm-bg-dark); color: var(--text-main); height: 100
 
 /* Buttons & Utilities */
 .btn { padding: 0.6rem 1rem; border-radius: 4px; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-primary { background: var(--fm-accent); color: white; }
 .btn-danger { background: var(--danger-color); color: white; }
 .btn-secondary { background: #334155; color: white; }
@@ -141,9 +152,9 @@ body { background-color: var(--fm-bg-dark); color: var(--text-main); height: 100
 .bg-red { background: var(--danger-color); }
 
 /* Modal & Toast */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: justify-content; z-index: 999; }
 .modal.hidden { display: none; }
-.modal-content { background: var(--fm-card-bg); padding: 1.5rem; border: 1px solid var(--fm-border); border-radius: 6px; max-width: 450px; width: 90%; }
+.modal-content { background: var(--fm-card-bg); padding: 1.5rem; border: 1px solid var(--fm-border); border-radius: 6px; max-width: 450px; width: 90%; margin: auto; }
 .modal-header { font-size: 0.75rem; font-weight: 800; color: var(--danger-color); margin-bottom: 0.5rem; }
 
 .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
