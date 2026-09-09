@@ -1,26 +1,182 @@
-<!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Empire & Influence — v0.2</title><link rel="stylesheet" href="style.css"></head>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URZIKSTAN — Republic of Power</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 <body>
-<div id="game">
-<header class="topbar">
-  <div class="brand">EMPIRE <span>&</span> INFLUENCE <small>1900 • GRAND STRATEGY</small></div>
-  <div class="resources"><div>💰 <b id="cash">$100,000</b><small> TREASURY</small></div><div>📈 <b id="income">$0</b><small>/QUARTER</small></div><div>⚖ <b id="influence">10</b><small> INFLUENCE</small></div></div>
-  <div class="time"><b id="date">1900 Q1</b><button id="pause">Ⅱ</button><button id="speed">▶</button></div>
-</header>
-<div class="layout">
-  <section class="mapwrap">
-    <canvas id="map"></canvas>
-    <div class="maptools"><button id="zoomIn">＋</button><button id="zoomOut">－</button><button id="reset">⌖</button></div>
-    <div class="maptitle">THE OLD WORLD <small>ECONOMIC SPHERE</small></div>
-    <div class="ticker" id="ticker">MARKET OPEN • WORLD TRADE IS STABLE</div>
-  </section>
-  <aside class="panel">
-    <div class="panelhead"><span id="panelType">WORLD</span><button id="close">×</button></div>
-    <div id="panelBody"><h1>Build your empire.</h1><p>Click a country, city, company, railway or ship. The world keeps moving while you make your fortune.</p><hr><b>QUICK START</b><p class="muted">Invest in a resource-rich country, then expand its industry and capture the trade route.</p></div>
-  </aside>
-</div>
-<nav class="bottom">
-<button data-tab="companies">🏭 COMPANIES</button><button data-tab="market">📈 MARKET</button><button data-tab="politics">🏛 POLITICS</button><button data-tab="world">🌍 WORLD</button>
-</nav>
-</div><script src="game.js"></script></body></html>
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Game Over Modal -->
+  <div id="gameover-modal" class="modal hidden">
+    <div class="modal-content text-center">
+      <h2 id="go-title" class="text-red">REZIM ANDA RUNTUH! 💥</h2>
+      <p id="go-reason">Rakyat melakukan revolusi dan merebut istana presiden.</p>
+      <br>
+      <button class="btn btn-danger btn-block" onclick="resetGame()">Mulai Ulang Rezim</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <header class="topbar">
+      <div class="brand">
+        <h1>REPUBLIC OF URZIKSTAN 👑</h1>
+        <span class="tagline">Obey, Survive, Dominate.</span>
+      </div>
+      <div class="top-stats">
+        <div class="stat-pill">
+          <span class="label">💰 Kas Negara</span>
+          <span class="value text-green" id="top-treasury">$100M</span>
+        </div>
+        <div class="stat-pill">
+          <span class="label">🛢️ Produksi Minyak</span>
+          <span class="value text-primary" id="top-oil">10k bbl/d</span>
+        </div>
+        <div class="stat-pill">
+          <span class="label">⚡ Ancaman Kudeta</span>
+          <span class="value text-red" id="top-threat">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <nav class="sidebar">
+        <div class="leader-badge">
+          <div class="leader-title">SUPREME LEADER</div>
+          <div class="leader-name">General Dictator</div>
+        </div>
+        <ul class="nav-links">
+          <li class="active" onclick="switchTab('palace')"><span>🏛️</span> Istana Presiden</li>
+          <li onclick="switchTab('factions')"><span>👥</span> Faksi & Loyalitas</li>
+          <li onclick="switchTab('military')"><span>🎖️</span> Militer & Nuklir</li>
+          <li onclick="switchTab('blackmarket')"><span>🕵️</span> Pasar Gelap & CIA</li>
+          <li onclick="switchTab('settings')"><span>⚙️</span> Pengaturan</li>
+        </ul>
+      </nav>
+
+      <main class="content-area">
+        <!-- TAB 1: PALACE / DASHBOARD -->
+        <section id="tab-palace" class="tab-content active">
+          <div class="card welcome-card">
+            <h2>SELAMAT PAGI, GENERAL! 👋</h2>
+            <p>Jaga stabilitas Urzikstan. Jangan biarkan militer, rakyat, atau faksi keagamaan terlalu membenci Anda.</p>
+          </div>
+
+          <!-- Poin Keseimbangan Utama -->
+          <div class="metrics-grid">
+            <div class="card">
+              <span class="metric-title">Loyalitas Militer</span>
+              <div class="progress-bar-container"><div class="progress-bar bg-blue" id="bar-military" style="width: 70%;"></div></div>
+              <small id="text-military">70% (Stabil)</small>
+            </div>
+            <div class="card">
+              <span class="metric-title">Dukungan Rakyat</span>
+              <div class="progress-bar-container"><div class="progress-bar bg-green" id="bar-people" style="width: 50%;"></div></div>
+              <small id="text-people">50% (Rentan Demo)</small>
+            </div>
+            <div class="card">
+              <span class="metric-title">Pengaruh Faksi Agama</span>
+              <div class="progress-bar-container"><div class="progress-bar bg-warning" id="bar-religion" style="width: 40%;"></div></div>
+              <small id="text-religion">40% (Netral)</small>
+            </div>
+          </div>
+
+          <!-- Sektor Pendapatan -->
+          <div class="card">
+            <h3>🛢️ Infrastruktur & Industri Minyak</h3>
+            <p>Sumber pendapatan utama rezim Urzikstan.</p>
+            <br>
+            <div class="cards-grid">
+              <div class="card-inner">
+                <h4>Sumur Minyak Al-Zubair</h4>
+                <p>Level: <strong id="oil-lvl">1</strong></p>
+                <p>Hasil: <strong class="text-green">+$10M/dtk</strong></p>
+                <button class="btn btn-primary" onclick="upgradeOil()">Upgrade ($50M)</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: FACTIONS & DECREES -->
+        <section id="tab-factions" class="tab-content">
+          <h2>📜 Dekrit & Kebijakan Diktator</h2>
+          <p class="subtitle">Keluarkan dekrit ekstrem untuk mempertahankan kekuasaan.</p>
+          <div class="cards-grid">
+            <div class="card">
+              <h3>Sensor Media Total</h3>
+              <p>Bungkam kritik media nasional.</p>
+              <small class="text-muted">Efek: +10% Loyalitas Militer, -15% Dukungan Rakyat</small>
+              <br><br>
+              <button class="btn btn-primary btn-block" onclick="issueDecree('media')">Terapkan ($20M)</button>
+            </div>
+            <div class="card">
+              <h3>Bagi-Bagi Subsidi Minyak</h3>
+              <p>Gunakan kas negara untuk menyenangkan rakyat.</p>
+              <small class="text-muted">Efek: +20% Dukungan Rakyat, -$30M Kas</small>
+              <br><br>
+              <button class="btn btn-primary btn-block" onclick="issueDecree('subsidy')">Bagi Subsidi ($30M)</button>
+            </div>
+            <div class="card">
+              <h3>Pembersihan Jenderal (Purge)</h3>
+              <p>Eksekusi jenderal yang berpotensi melakukan kudeta.</p>
+              <small class="text-muted">Efek: Ancaman Kudeta -30%, Loyalitas Militer -20%</small>
+              <br><br>
+              <button class="btn btn-danger btn-block" onclick="issueDecree('purge')">Eksekusi Rival ($50M)</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: MILITARY & NUCLEAR -->
+        <section id="tab-military" class="tab-content">
+          <h2>🎖️ Kekuatan Militer & Program Nuklir</h2>
+          <div class="card">
+            <h3>Proyek Senjata Nuklir Urzikstan ☢️</h3>
+            <p>Nuklir adalah jaminan agar negara barat (AS/NATO) tidak berani menginvasi Urzikstan.</p>
+            <div class="progress-bar-container"><div class="progress-bar bg-red" id="bar-nuke" style="width: 0%;"></div></div>
+            <p id="nuke-status">Progress: 0%</p>
+            <br>
+            <button class="btn btn-danger" onclick="developNuke()">Danai Riset Nuklir ($100M)</button>
+          </div>
+        </section>
+
+        <!-- TAB 4: BLACK MARKET -->
+        <section id="tab-blackmarket" class="tab-content">
+          <h2>🕵️ Operasi Gelap & Suap Foreign Intelligence</h2>
+          <div class="cards-grid">
+            <div class="card">
+              <h3>Suap Agen CIA</h3>
+              <p>Turunkan ancaman intervensi militer asing.</p>
+              <button class="btn btn-secondary btn-block" onclick="bribeCIA()">Bayar Suap ($40M)</button>
+            </div>
+            <div class="card">
+              <h3>Jual Minyak Gelap di Black Market</h3>
+              <p>Dapatkan kas cepat tanpa melapor ke laporan negara.</p>
+              <button class="btn btn-primary btn-block" onclick="sellBlackOil()">Jual Pasokan ($15M Cash)</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: SETTINGS -->
+        <section id="tab-settings" class="tab-content">
+          <h2>⚙️ Opsi Game</h2>
+          <div class="card">
+            <button class="btn btn-danger" onclick="resetGame()">Hard Reset Urzikstan</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <nav class="bottom-nav">
+      <div class="nav-item active" onclick="switchTab('palace')"><span>🏛️</span>Istana</div>
+      <div class="nav-item" onclick="switchTab('factions')"><span>📜</span>Dekrit</div>
+      <div class="nav-item" onclick="switchTab('military')"><span>🎖️</span>Militer</div>
+      <div class="nav-item" onclick="switchTab('blackmarket')"><span>🕵️</span>Gelap</div>
+    </nav>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
