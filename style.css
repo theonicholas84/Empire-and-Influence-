@@ -141,6 +141,7 @@ body.emergency-mode {
 .text-muted { color: var(--text-muted); }
 .text-center { text-align: center; }
 .mt-2 { margin-top: 0.75rem; }
+.mb-2 { margin-bottom: 0.75rem; }
 
 .bg-blue { background: #3B82F6; }
 .bg-green { background: var(--success-color); }
