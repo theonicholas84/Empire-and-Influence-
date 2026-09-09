@@ -3,38 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>URZIKSTAN — State Manager</title>
+  <title>URZIKSTAN — Victoria & FM Manager</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Event Modal -->
-  <div id="event-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">⚠️ INSIDEN KEAMANAN NASIONAL</div>
-      <h3 id="ev-title" class="text-danger">PEMBERONTAKAN MILISI AL-QATALA</h3>
-      <p id="ev-desc" class="text-muted">Pemberontak mengepung kawasan kilang minyak utama.</p>
-      <div class="event-actions">
-        <button class="btn btn-primary btn-block" id="ev-btn1">Kirim Pasukan Khusus ($20M)</button>
-        <button class="btn btn-secondary btn-block" id="ev-btn2">Bayar Tebusan ($50M)</button>
-        <button class="btn btn-danger btn-block" id="ev-btn3">Abaikan Saja</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Game Over Modal -->
   <div id="gameover-modal" class="modal hidden">
     <div class="modal-content text-center">
       <h2 class="text-danger">REZIM DIPAKSA LENGSER! 💥</h2>
-      <p id="go-reason" class="text-muted">Kudeta militer mengambil alih kontrol ibu kota.</p>
+      <p id="go-reason" class="text-muted">Kudeta merebut pimpinan negara.</p>
       <br>
-      <button class="btn btn-danger btn-block" id="btn-reset-go">Mulai Ulang Era (1960)</button>
+      <button class="btn btn-danger btn-block" onclick="location.reload()">Mulai Ulang Era</button>
     </div>
   </div>
 
-  <!-- Dashboard Layout -->
   <div class="fm-app">
     <!-- Top Bar -->
     <header class="fm-topbar">
@@ -42,17 +27,17 @@
         <div class="fm-flag">🇸🇾</div>
         <div>
           <div class="fm-nation-title">REPUBLIC OF URZIKSTAN</div>
-          <div class="fm-manager-title">General Dictator — Supreme Commander</div>
+          <div class="fm-manager-title">Supreme State Manager</div>
         </div>
       </div>
 
       <div class="fm-top-stats">
         <div class="fm-stat-box">
           <span class="label">KAS NEGARA</span>
-          <span class="value text-success" id="top-treasury">$100M</span>
+          <span class="value text-success" id="top-treasury">$150M</span>
         </div>
         <div class="fm-stat-box">
-          <span class="label">LEMBAGA PBB</span>
+          <span class="label">SANKSI PBB</span>
           <span class="value text-warning" id="top-sanctions">0%</span>
         </div>
         <div class="fm-stat-box">
@@ -66,204 +51,108 @@
       </div>
     </header>
 
-    <!-- World Event Banner Active Indicator -->
-    <div id="world-event-banner" class="world-event-banner hidden">
-      <span>🌍 <strong>EVENT DUNIA AKTIF:</strong> <span id="world-event-title">---</span> — <span id="world-event-desc">---</span></span>
-    </div>
-
     <div class="fm-body">
       <!-- Sidebar Navigation -->
       <nav class="fm-sidebar">
-        <div class="sidebar-category">RINGKASAN</div>
-        <button class="fm-nav-btn active" data-tab="overview">📊 Ikhtisar Negara</button>
-        <button class="fm-nav-btn" data-tab="pops">👥 Populasi & Faksi (Pops)</button>
+        <div class="sidebar-category">RINGKASAN & EKONOMI</div>
+        <button class="fm-nav-btn active" data-tab="overview">📊 Ikhtisar Ekonomi</button>
+        <button class="fm-nav-btn" data-tab="sectors">🏗️ Sektor Makro & Produksi</button>
+        <button class="fm-nav-btn" data-tab="pops">👥 Pops Economy (Victoria 3)</button>
 
-        <div class="sidebar-category">PEMBANGUNAN & KEBIJAKAN</div>
-        <button class="fm-nav-btn" data-tab="buildings">🏛️ Sistem Bangunan</button>
-        <button class="fm-nav-btn" data-tab="laws">📜 Undang-Undang & Dekrit</button>
-        <button class="fm-nav-btn" data-tab="diplomacy">🌐 Diplomasi & PBB</button>
-
-        <div class="sidebar-category">MILITER</div>
-        <button class="fm-nav-btn" data-tab="military">🎖️ Pertahanan & Nuklir</button>
-        <button class="fm-nav-btn" data-tab="settings">⚙️ Pengaturan</button>
+        <div class="sidebar-category">GLOBAL POLITICS</div>
+        <button class="fm-nav-btn" data-tab="diplomacy">🌐 Hubungan Internasional</button>
       </nav>
 
-      <!-- Main Content Screen -->
+      <!-- Main Content Area -->
       <main class="fm-content">
-        <!-- TAB 1: OVERVIEW -->
+        <!-- TAB 1: IKHTISAR EKONOMI -->
         <section id="tab-overview" class="tab-content active">
-          <div class="fm-panel-header">IKHTISAR STABILITAS & EKONOMI</div>
+          <div class="fm-panel-header">IKHTISAR OUTPUT EKONOMI & RESOURCE STOCKS</div>
           
-          <div class="fm-grid-3">
+          <div class="fm-grid-3 mb-2">
             <div class="fm-card">
-              <div class="card-title">METRIK UTAMA STABILITAS</div>
-              <div class="stat-row">
-                <span>Loyalitas Militer</span>
-                <span id="val-military" class="text-primary">70%</span>
-              </div>
-              <div class="bar-bg"><div class="bar-fill bg-blue" id="bar-military" style="width: 70%;"></div></div>
-
-              <div class="stat-row mt-2">
-                <span>Dukungan Rakyat</span>
-                <span id="val-people" class="text-success">50%</span>
-              </div>
-              <div class="bar-bg"><div class="bar-fill bg-green" id="bar-people" style="width: 50%;"></div></div>
-
-              <div class="stat-row mt-2">
-                <span>Cult of Personality</span>
-                <span id="val-cult" class="text-warning">10%</span>
-              </div>
-              <div class="bar-bg"><div class="bar-fill bg-warning" id="bar-cult" style="width: 10%;"></div></div>
+              <h4>🛢️ Stok Minyak</h4>
+              <h2 id="res-oil" class="text-warning">500 Barrel</h2>
             </div>
-
             <div class="fm-card">
-              <div class="card-title">PRODUKSI MINYAK & INDUSTRI</div>
-              <p class="text-muted">Sumber modal utama pembiayaan rezim Urzikstan.</p>
-              <div class="stat-row mt-2">
-                <span>Tingkat Kilang</span>
-                <span id="oil-lvl-txt">Level 1</span>
-              </div>
-              <div class="stat-row">
-                <span>Hasil Bersih</span>
-                <span id="oil-income-txt" class="text-success">+$10.0M / dtk</span>
-              </div>
+              <h4>🏭 Stok Baja (Steel)</h4>
+              <h2 id="res-steel" class="text-primary">200 Ton</h2>
+            </div>
+            <div class="fm-card">
+              <h4>🌾 Stok Pangan (Food)</h4>
+              <h2 id="res-food" class="text-success">1000 Ton</h2>
+            </div>
+          </div>
+
+          <div class="fm-grid-2">
+            <div class="fm-card">
+              <h4>GRAFIK LAJU OUTPUT EKONOMI (10 BULAN)</h4>
+              <canvas id="economy-graph" width="400" height="150" style="width:100%; border:1px solid #283245; border-radius:4px; margin-top:10px;"></canvas>
+            </div>
+            <div class="fm-card">
+              <h4>RESOURCE CONVERSION ENGINE</h4>
+              <p class="text-muted">Konversi stok barang dasar menjadi komoditas industri.</p>
               <br>
-              <button class="btn btn-primary btn-block" id="btn-upgrade-oil">Ekspansi Kilang ($50M)</button>
-            </div>
-
-            <div class="fm-card">
-              <div class="card-title">PROPAGANDA & KULTUS</div>
-              <p class="text-muted">Bangun citra Supreme Leader untuk menekan resiko kudeta.</p>
-              <button class="btn btn-secondary btn-block mt-2" id="btn-statue">Dirikan Patung Emas ($80M)</button>
-              <button class="btn btn-secondary btn-block mt-2" id="btn-education">Doktrin Kurikulum Sekolah ($50M)</button>
+              <button class="btn btn-secondary btn-block" id="btn-convert-oil">Konversi 100 Minyak ➔ 50 Steel</button>
             </div>
           </div>
         </section>
 
-        <!-- TAB 2: POPS -->
+        <!-- TAB 2: SEKTOR EKONOMI -->
+        <section id="tab-sectors" class="tab-content">
+          <div class="fm-panel-header">SEKTOR EKONOMI TETAP (INCOME & OUTPUT)</div>
+          <div id="sector-list-container" class="fm-grid-3">
+            <!-- Dynamic Injection -->
+          </div>
+        </section>
+
+        <!-- TAB 3: POPS ECONOMY -->
         <section id="tab-pops" class="tab-content">
-          <div class="fm-panel-header">ANALISIS KELOMPOK POPULASI (POPS)</div>
+          <div class="fm-panel-header">STRUKTUR POPULASI & TUNTUTAN POPS (VICTORIA 3 SYSTEM)</div>
           <table class="fm-table">
             <thead>
               <tr>
                 <th>Kelompok Pop</th>
-                <th>Jumlah Populasi</th>
-                <th>Tingkat Kepuasan</th>
-                <th>Pengaruh Politik</th>
+                <th>Jumlah</th>
+                <th>Income Tier</th>
+                <th>Kepuasan</th>
+                <th>Kerusuhan</th>
                 <th>Tuntutan Utama</th>
+                <th>Status Tuntutan</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td><strong>💂 Jenderal Militer</strong></td>
-                <td>120.000</td>
-                <td id="pop-mil-sat" class="text-primary">70%</td>
-                <td>Tinggi (45%)</td>
-                <td>Anggaran Alat Utama Sistem Senjata</td>
-              </tr>
-              <tr>
-                <td><strong>🌾 Buruh & Petani</strong></td>
-                <td>3.400.000</td>
-                <td id="pop-peo-sat" class="text-success">50%</td>
-                <td>Sedang (35%)</td>
-                <td>Subsidi Pangan & Harga Minyak Murah</td>
-              </tr>
-              <tr>
-                <td><strong>🕌 Faksi Keagamaan</strong></td>
-                <td>1.100.000</td>
-                <td class="text-warning">40%</td>
-                <td>Rendah (20%)</td>
-                <td>Penerapan Hukum Moral Ketat</td>
-              </tr>
+            <tbody id="pops-table-body">
+              <!-- Dynamic Injection -->
             </tbody>
           </table>
         </section>
 
-        <!-- TAB BARU: BUILDINGS -->
-        <section id="tab-buildings" class="tab-content">
-          <div class="fm-panel-header">SISTEM BANGUNAN & INVESTASI INFRASTRUKTUR</div>
-          <div id="building-list-container" class="fm-grid-3">
-            <!-- Diisi otomatis melalui renderBuildingsUI() di JS -->
-          </div>
-        </section>
-
-        <!-- TAB 3: LAWS -->
-        <section id="tab-laws" class="tab-content">
-          <div class="fm-panel-header">UNDANG-UNDANG & DEKRIT DARURAT</div>
-          <div class="fm-grid-3">
-            <div class="fm-card">
-              <h4>Sensor Media & Press</h4>
-              <p class="text-muted">Larang pers asing dan publikasi independen.</p>
-              <small class="text-warning">+10% Militer | -15% Rakyat | +10% Sanksi PBB</small>
-              <button class="btn btn-primary btn-block mt-2" id="btn-decree-media">Sahkan Dekrit ($20M)</button>
-            </div>
-
-            <div class="fm-card">
-              <h4>Subsidi Nasional</h4>
-              <p class="text-muted">Sogok kelompok masyarakat bawah agar tidak demo.</p>
-              <small class="text-success">+20% Dukungan Rakyat | -$30M Kas</small>
-              <button class="btn btn-primary btn-block mt-2" id="btn-decree-subsidy">Keluarkan Subsidi ($30M)</button>
-            </div>
-
-            <div class="fm-card">
-              <h4>Pembersihan Internal (Purge)</h4>
-              <p class="text-muted">Eksekusi jenderal pembangkang di tubuh militer.</p>
-              <small class="text-danger">-30% Kudeta | -20% Militer | +15% Sanksi PBB</small>
-              <button class="btn btn-danger btn-block mt-2" id="btn-decree-purge">Eksekusi Perwira ($50M)</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB 4: DIPLOMACY -->
+        <!-- TAB 4: DIPLOMASI INTERNASIONAL -->
         <section id="tab-diplomacy" class="tab-content">
-          <div class="fm-panel-header">HUBUNGAN INTERNASIONAL & AMBANG EMBARGO PBB</div>
-          <div class="fm-card">
+          <div class="fm-panel-header">HUBUNGAN INTERNASIONAL & LIGA NEGARA (13 NEGARA RIVAL)</div>
+          
+          <div class="fm-card mb-2">
             <div class="stat-row">
-              <span>Sanksi PBB Aktif</span>
-              <span id="un-sanctions-text" class="text-warning">0%</span>
+              <h4>DEWAN KEAMANAN PBB & MAJELIS VETO</h4>
+              <button class="btn btn-primary" id="btn-call-un">Call UN Emergency Session ($50M)</button>
             </div>
-            <div class="bar-bg"><div class="bar-fill bg-red" id="bar-sanctions" style="width: 0%;"></div></div>
-            <p class="text-muted mt-2">⚠️ Jika sanksi mencapai 100%, ekspor minyak Urzikstan dibekukan total (Pendapatan $0)!</p>
-            <br>
-            <button class="btn btn-secondary" id="btn-bribe-un">Suap Utusan PBB (-20% Sanksi / $60M)</button>
           </div>
 
-          <div class="fm-grid-2 mt-2">
-            <div class="fm-card">
-              <h4>🇺🇸 Blok Barat (USA)</h4>
-              <p>Status Relasi: <strong id="rel-usa">Netral</strong></p>
-              <button class="btn btn-primary btn-block mt-2" id="btn-align-usa">Aliansi Blok Barat ($40M)</button>
-            </div>
-            <div class="fm-card">
-              <h4>🛠️ Blok Timur (USSR)</h4>
-              <p>Status Relasi: <strong id="rel-ussr">Netral</strong></p>
-              <button class="btn btn-primary btn-block mt-2" id="btn-align-ussr">Aliansi Blok Timur ($40M)</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB 5: MILITARY -->
-        <section id="tab-military" class="tab-content">
-          <div class="fm-panel-header">PROGRAM PERTAHANAN & NUKLIR</div>
-          <div class="fm-card">
-            <h4>Pengembangan Hulu Ledak Nuklir ☢️</h4>
-            <div class="stat-row mt-2">
-              <span>Progres Nuklir</span>
-              <span id="nuke-status-txt" class="text-danger">0%</span>
-            </div>
-            <div class="bar-bg"><div class="bar-fill bg-red" id="bar-nuke" style="width: 0%;"></div></div>
-            <p class="text-muted mt-2">⚠️ Pengujian merusak reputasi PBB secara signifikan (+25% Sanksi PBB).</p>
-            <br>
-            <button class="btn btn-danger" id="btn-develop-nuke">Danai Uji Coba Nuklir ($100M)</button>
-          </div>
-        </section>
-
-        <!-- TAB 6: SETTINGS -->
-        <section id="tab-settings" class="tab-content">
-          <div class="fm-panel-header">PENGATURAN REZIM</div>
-          <div class="fm-card">
-            <button class="btn btn-danger" id="btn-hard-reset">Hard Reset Urzikstan</button>
-          </div>
+          <table class="fm-table">
+            <thead>
+              <tr>
+                <th>Negara</th>
+                <th>Status</th>
+                <th>Perjanjian (Pact)</th>
+                <th>Relasi</th>
+                <th>Diplomatic Favor</th>
+                <th>Tindakan Diplomasi</th>
+              </tr>
+            </thead>
+            <tbody id="diplomacy-table-body">
+              <!-- Dynamic Injection -->
+            </tbody>
+          </table>
         </section>
       </main>
     </div>
