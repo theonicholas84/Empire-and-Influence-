@@ -3,12 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>URZIKSTAN — Republic of Power</title>
+  <title>URZIKSTAN — Cold War Dictator (1960)</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- Random Event Modal -->
+  <div id="event-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="ev-title" class="text-red">⚠️ KRISIS KRITIS!</h3>
+      <p id="ev-desc">Pemberontak menyerang ladang minyak!</p>
+      <div class="event-actions">
+        <button class="btn btn-primary btn-block" onclick="resolveEvent(1)" id="ev-btn1">Kirim Pasukan Militer ($20M)</button>
+        <button class="btn btn-secondary btn-block" onclick="resolveEvent(2)" id="ev-btn2">Bayar Tebusan ($50M)</button>
+        <button class="btn btn-danger btn-block" onclick="resolveEvent(3)" id="ev-btn3">Abaikan Saja</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Game Over Modal -->
   <div id="gameover-modal" class="modal hidden">
@@ -16,7 +29,7 @@
       <h2 id="go-title" class="text-red">REZIM ANDA RUNTUH! 💥</h2>
       <p id="go-reason">Rakyat melakukan revolusi dan merebut istana presiden.</p>
       <br>
-      <button class="btn btn-danger btn-block" onclick="resetGame()">Mulai Ulang Rezim</button>
+      <button class="btn btn-danger btn-block" onclick="resetGame()">Mulai Ulang Rezim (1960)</button>
     </div>
   </div>
 
@@ -24,7 +37,7 @@
     <header class="topbar">
       <div class="brand">
         <h1>REPUBLIC OF URZIKSTAN 👑</h1>
-        <span class="tagline">Obey, Survive, Dominate.</span>
+        <span class="tagline" id="top-year">📅 TAHUN: 1960</span>
       </div>
       <div class="top-stats">
         <div class="stat-pill">
@@ -32,8 +45,8 @@
           <span class="value text-green" id="top-treasury">$100M</span>
         </div>
         <div class="stat-pill">
-          <span class="label">🛢️ Produksi Minyak</span>
-          <span class="value text-primary" id="top-oil">10k bbl/d</span>
+          <span class="label">🌐 Sanksi PBB</span>
+          <span class="value text-warning" id="top-sanctions">0%</span>
         </div>
         <div class="stat-pill">
           <span class="label">⚡ Ancaman Kudeta</span>
@@ -49,113 +62,133 @@
           <div class="leader-name">General Dictator</div>
         </div>
         <ul class="nav-links">
-          <li class="active" onclick="switchTab('palace')"><span>🏛️</span> Istana Presiden</li>
-          <li onclick="switchTab('factions')"><span>👥</span> Faksi & Loyalitas</li>
+          <li class="active" onclick="switchTab('palace')"><span>🏛️</span> Istana & Propaganda</li>
+          <li onclick="switchTab('factions')"><span>📜</span> Dekrit Rezim</li>
+          <li onclick="switchTab('diplomacy')"><span>🌍</span> Diplomasi Global & PBB</li>
           <li onclick="switchTab('military')"><span>🎖️</span> Militer & Nuklir</li>
-          <li onclick="switchTab('blackmarket')"><span>🕵️</span> Pasar Gelap & CIA</li>
           <li onclick="switchTab('settings')"><span>⚙️</span> Pengaturan</li>
         </ul>
       </nav>
 
       <main class="content-area">
-        <!-- TAB 1: PALACE / DASHBOARD -->
+        <!-- TAB 1: PALACE & PROPAGANDA -->
         <section id="tab-palace" class="tab-content active">
           <div class="card welcome-card">
             <h2>SELAMAT PAGI, GENERAL! 👋</h2>
-            <p>Jaga stabilitas Urzikstan. Jangan biarkan militer, rakyat, atau faksi keagamaan terlalu membenci Anda.</p>
+            <p>Tahun <strong id="palace-year">1960</strong>. Kembangkan Urzikstan di tengah tensi Perang Dingin global.</p>
           </div>
 
-          <!-- Poin Keseimbangan Utama -->
+          <!-- Stabilitas Negara -->
           <div class="metrics-grid">
             <div class="card">
               <span class="metric-title">Loyalitas Militer</span>
               <div class="progress-bar-container"><div class="progress-bar bg-blue" id="bar-military" style="width: 70%;"></div></div>
-              <small id="text-military">70% (Stabil)</small>
+              <small id="text-military">70%</small>
             </div>
             <div class="card">
               <span class="metric-title">Dukungan Rakyat</span>
               <div class="progress-bar-container"><div class="progress-bar bg-green" id="bar-people" style="width: 50%;"></div></div>
-              <small id="text-people">50% (Rentan Demo)</small>
+              <small id="text-people">50%</small>
             </div>
             <div class="card">
-              <span class="metric-title">Pengaruh Faksi Agama</span>
-              <div class="progress-bar-container"><div class="progress-bar bg-warning" id="bar-religion" style="width: 40%;"></div></div>
-              <small id="text-religion">40% (Netral)</small>
+              <span class="metric-title">Kultus Kepribadian</span>
+              <div class="progress-bar-container"><div class="progress-bar bg-warning" id="bar-cult" style="width: 10%;"></div></div>
+              <small id="text-cult">10% (Rendah)</small>
             </div>
           </div>
 
-          <!-- Sektor Pendapatan -->
+          <!-- Proyek Kultus Kepribadian -->
           <div class="card">
-            <h3>🛢️ Infrastruktur & Industri Minyak</h3>
-            <p>Sumber pendapatan utama rezim Urzikstan.</p>
+            <h3>🗿 Cult of Personality & Propaganda</h3>
+            <p>Agungkan nama Anda untuk membungkam oposisi rakyat.</p>
             <br>
             <div class="cards-grid">
               <div class="card-inner">
-                <h4>Sumur Minyak Al-Zubair</h4>
-                <p>Level: <strong id="oil-lvl">1</strong></p>
-                <p>Hasil: <strong class="text-green">+$10M/dtk</strong></p>
-                <button class="btn btn-primary" onclick="upgradeOil()">Upgrade ($50M)</button>
+                <h4>Patung Emas Sang Diktator</h4>
+                <p>Meningkatkan kultus secara instan.</p>
+                <button class="btn btn-primary btn-block" onclick="buildStatue()">Dirikan Patung ($80M)</button>
+              </div>
+              <div class="card-inner">
+                <h4>Kurikulum Doktrin Rezim</h4>
+                <p>Cuci otak generasi muda sejak sekolah.</p>
+                <button class="btn btn-primary btn-block" onclick="brainwashEducation()">Terapkan ($50M)</button>
               </div>
             </div>
           </div>
+
+          <!-- Produksi Minyak -->
+          <div class="card">
+            <h3>🛢️ Industri Minyak Negara</h3>
+            <p id="oil-status-text">Pendapatan Bersih: +$10M/dtk</p>
+            <button class="btn btn-primary" onclick="upgradeOil()">Upgrade Kilang ($50M)</button>
+          </div>
         </section>
 
-        <!-- TAB 2: FACTIONS & DECREES -->
+        <!-- TAB 2: DECREES -->
         <section id="tab-factions" class="tab-content">
-          <h2>📜 Dekrit & Kebijakan Diktator</h2>
-          <p class="subtitle">Keluarkan dekrit ekstrem untuk mempertahankan kekuasaan.</p>
+          <h2>📜 Dekrit & Eksekusi Politik</h2>
           <div class="cards-grid">
             <div class="card">
               <h3>Sensor Media Total</h3>
-              <p>Bungkam kritik media nasional.</p>
-              <small class="text-muted">Efek: +10% Loyalitas Militer, -15% Dukungan Rakyat</small>
+              <p>Bungkam semua jurnalis independen.</p>
+              <small class="text-muted">Efek: +10% Militer, -15% Rakyat, +10% Sanksi PBB</small>
               <br><br>
               <button class="btn btn-primary btn-block" onclick="issueDecree('media')">Terapkan ($20M)</button>
             </div>
             <div class="card">
-              <h3>Bagi-Bagi Subsidi Minyak</h3>
-              <p>Gunakan kas negara untuk menyenangkan rakyat.</p>
+              <h3>Bagi-Bagi Subsidi Rakyat</h3>
+              <p>Sogok rakyat agar tidak demo.</p>
               <small class="text-muted">Efek: +20% Dukungan Rakyat, -$30M Kas</small>
               <br><br>
               <button class="btn btn-primary btn-block" onclick="issueDecree('subsidy')">Bagi Subsidi ($30M)</button>
             </div>
             <div class="card">
-              <h3>Pembersihan Jenderal (Purge)</h3>
-              <p>Eksekusi jenderal yang berpotensi melakukan kudeta.</p>
-              <small class="text-muted">Efek: Ancaman Kudeta -30%, Loyalitas Militer -20%</small>
+              <h3>Pembersihan Perwira (Purge)</h3>
+              <p>Eksekusi faksi militer pembangkang.</p>
+              <small class="text-muted">Efek: Ancaman Kudeta -30%, -20% Militer, +15% Sanksi PBB</small>
               <br><br>
-              <button class="btn btn-danger btn-block" onclick="issueDecree('purge')">Eksekusi Rival ($50M)</button>
+              <button class="btn btn-danger btn-block" onclick="issueDecree('purge')">Eksekusi Jenderal ($50M)</button>
             </div>
           </div>
         </section>
 
-        <!-- TAB 3: MILITARY & NUCLEAR -->
+        <!-- TAB 3: DIPLOMACY & UN SANCTIONS -->
+        <section id="tab-diplomacy" class="tab-content">
+          <h2>🌍 Hubungan Internasional & PBB</h2>
+          
+          <div class="card">
+            <h3>🏛️ Embargo & Dewan Keamanan PBB</h3>
+            <p>Pengaruh Sanksi PBB saat ini: <strong id="un-sanctions-val" class="text-warning">0%</strong></p>
+            <div class="progress-bar-container"><div class="progress-bar bg-red" id="bar-sanctions" style="width: 0%;"></div></div>
+            <small class="text-muted">⚠️ Jika sanksi mencapai 100%, ekspor minyak Urzikstan dibekukan total (Pendapatan $0)!</small>
+            <br><br>
+            <button class="btn btn-secondary" onclick="bribeUN()">Suap Utusan PBB (-20% Sanksi / $60M)</button>
+          </div>
+
+          <div class="cards-grid">
+            <div class="card">
+              <h3>🇺🇸 Amerika Serikat (USA)</h3>
+              <p>Relasi: <strong id="rel-usa">Netral</strong></p>
+              <button class="btn btn-primary btn-block" onclick="alignSuperpower('usa')">Pihak Blok Barat ($40M)</button>
+            </div>
+            <div class="card">
+              <h3>🛠️ Uni Soviet (USSR)</h3>
+              <p>Relasi: <strong id="rel-ussr">Netral</strong></p>
+              <button class="btn btn-primary btn-block" onclick="alignSuperpower('ussr')">Pihak Blok Timur ($40M)</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: MILITARY & NUKE -->
         <section id="tab-military" class="tab-content">
           <h2>🎖️ Kekuatan Militer & Program Nuklir</h2>
           <div class="card">
-            <h3>Proyek Senjata Nuklir Urzikstan ☢️</h3>
-            <p>Nuklir adalah jaminan agar negara barat (AS/NATO) tidak berani menginvasi Urzikstan.</p>
+            <h3>Program Senjata Nuklir Urzikstan ☢️</h3>
+            <p>Progres: <strong id="nuke-status">0%</strong></p>
             <div class="progress-bar-container"><div class="progress-bar bg-red" id="bar-nuke" style="width: 0%;"></div></div>
-            <p id="nuke-status">Progress: 0%</p>
-            <br>
-            <button class="btn btn-danger" onclick="developNuke()">Danai Riset Nuklir ($100M)</button>
-          </div>
-        </section>
-
-        <!-- TAB 4: BLACK MARKET -->
-        <section id="tab-blackmarket" class="tab-content">
-          <h2>🕵️ Operasi Gelap & Suap Foreign Intelligence</h2>
-          <div class="cards-grid">
-            <div class="card">
-              <h3>Suap Agen CIA</h3>
-              <p>Turunkan ancaman intervensi militer asing.</p>
-              <button class="btn btn-secondary btn-block" onclick="bribeCIA()">Bayar Suap ($40M)</button>
-            </div>
-            <div class="card">
-              <h3>Jual Minyak Gelap di Black Market</h3>
-              <p>Dapatkan kas cepat tanpa melapor ke laporan negara.</p>
-              <button class="btn btn-primary btn-block" onclick="sellBlackOil()">Jual Pasokan ($15M Cash)</button>
-            </div>
+            <small class="text-muted">⚠️ Setiap riset memicu lonjakan Sanksi PBB (+25%) dan kecurigaan AS/USSR!</small>
+            <br><br>
+            <button class="btn btn-danger" onclick="developNuke()">Danai Uji Coba Nuklir ($100M)</button>
           </div>
         </section>
 
@@ -163,7 +196,7 @@
         <section id="tab-settings" class="tab-content">
           <h2>⚙️ Opsi Game</h2>
           <div class="card">
-            <button class="btn btn-danger" onclick="resetGame()">Hard Reset Urzikstan</button>
+            <button class="btn btn-danger" onclick="resetGame()">Hard Reset Urzikstan (Kembali ke 1960)</button>
           </div>
         </section>
       </main>
@@ -172,8 +205,8 @@
     <nav class="bottom-nav">
       <div class="nav-item active" onclick="switchTab('palace')"><span>🏛️</span>Istana</div>
       <div class="nav-item" onclick="switchTab('factions')"><span>📜</span>Dekrit</div>
+      <div class="nav-item" onclick="switchTab('diplomacy')"><span>🌍</span>Diplomasi</div>
       <div class="nav-item" onclick="switchTab('military')"><span>🎖️</span>Militer</div>
-      <div class="nav-item" onclick="switchTab('blackmarket')"><span>🕵️</span>Gelap</div>
     </nav>
   </div>
 
