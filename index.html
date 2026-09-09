@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>URZIKSTAN — Victoria & FM Manager</title>
+  <title>URZIKSTAN — Football Manager Style State Manager</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -21,13 +21,13 @@
   </div>
 
   <div class="fm-app">
-    <!-- Top Bar -->
+    <!-- Header / Topbar bergaya FM Header -->
     <header class="fm-topbar">
       <div class="fm-club-info">
         <div class="fm-flag">🇸🇾</div>
         <div>
           <div class="fm-nation-title">REPUBLIC OF URZIKSTAN</div>
-          <div class="fm-manager-title">Supreme State Manager</div>
+          <div class="fm-manager-title">General Dictator — Supreme Commander</div>
         </div>
       </div>
 
@@ -52,46 +52,47 @@
     </header>
 
     <div class="fm-body">
-      <!-- Sidebar Navigation -->
+      <!-- FM Sidebar Navigation -->
       <nav class="fm-sidebar">
         <div class="sidebar-category">RINGKASAN & EKONOMI</div>
         <button class="fm-nav-btn active" data-tab="overview">📊 Ikhtisar Ekonomi</button>
-        <button class="fm-nav-btn" data-tab="sectors">🏗️ Sektor Makro & Produksi</button>
+        <button class="fm-nav-btn" data-tab="sectors">🏗️ Sektor Makro & Industri</button>
         <button class="fm-nav-btn" data-tab="pops">👥 Pops Economy (Victoria 3)</button>
 
-        <div class="sidebar-category">GLOBAL POLITICS</div>
+        <div class="sidebar-category">POLITIK & DIPLOMASI</div>
         <button class="fm-nav-btn" data-tab="diplomacy">🌐 Hubungan Internasional</button>
       </nav>
 
       <!-- Main Content Area -->
       <main class="fm-content">
+        
         <!-- TAB 1: IKHTISAR EKONOMI -->
         <section id="tab-overview" class="tab-content active">
           <div class="fm-panel-header">IKHTISAR OUTPUT EKONOMI & RESOURCE STOCKS</div>
           
           <div class="fm-grid-3 mb-2">
             <div class="fm-card">
-              <h4>🛢️ Stok Minyak</h4>
-              <h2 id="res-oil" class="text-warning">500 Barrel</h2>
+              <span class="card-label">STOK MINYAK</span>
+              <div id="res-oil" class="card-value text-warning">500 Barrel</div>
             </div>
             <div class="fm-card">
-              <h4>🏭 Stok Baja (Steel)</h4>
-              <h2 id="res-steel" class="text-primary">200 Ton</h2>
+              <span class="card-label">STOK BAJA (STEEL)</span>
+              <div id="res-steel" class="card-value text-primary">200 Ton</div>
             </div>
             <div class="fm-card">
-              <h4>🌾 Stok Pangan (Food)</h4>
-              <h2 id="res-food" class="text-success">1000 Ton</h2>
+              <span class="card-label">STOK PANGAN (FOOD)</span>
+              <div id="res-food" class="card-value text-success">1000 Ton</div>
             </div>
           </div>
 
           <div class="fm-grid-2">
             <div class="fm-card">
-              <h4>GRAFIK LAJU OUTPUT EKONOMI (10 BULAN)</h4>
-              <canvas id="economy-graph" width="400" height="150" style="width:100%; border:1px solid #283245; border-radius:4px; margin-top:10px;"></canvas>
+              <div class="card-title">GRAFIK LAJU OUTPUT EKONOMI (10 BULAN)</div>
+              <canvas id="economy-graph" width="400" height="150"></canvas>
             </div>
             <div class="fm-card">
-              <h4>RESOURCE CONVERSION ENGINE</h4>
-              <p class="text-muted">Konversi stok barang dasar menjadi komoditas industri.</p>
+              <div class="card-title">RESOURCE CONVERSION ENGINE</div>
+              <p class="text-muted">Konversi stok minyak menjadi komoditas baja untuk pembangunan.</p>
               <br>
               <button class="btn btn-secondary btn-block" id="btn-convert-oil">Konversi 100 Minyak ➔ 50 Steel</button>
             </div>
@@ -102,29 +103,31 @@
         <section id="tab-sectors" class="tab-content">
           <div class="fm-panel-header">SEKTOR EKONOMI TETAP (INCOME & OUTPUT)</div>
           <div id="sector-list-container" class="fm-grid-3">
-            <!-- Dynamic Injection -->
+            <!-- Dynamic Injection JS -->
           </div>
         </section>
 
         <!-- TAB 3: POPS ECONOMY -->
         <section id="tab-pops" class="tab-content">
           <div class="fm-panel-header">STRUKTUR POPULASI & TUNTUTAN POPS (VICTORIA 3 SYSTEM)</div>
-          <table class="fm-table">
-            <thead>
-              <tr>
-                <th>Kelompok Pop</th>
-                <th>Jumlah</th>
-                <th>Income Tier</th>
-                <th>Kepuasan</th>
-                <th>Kerusuhan</th>
-                <th>Tuntutan Utama</th>
-                <th>Status Tuntutan</th>
-              </tr>
-            </thead>
-            <tbody id="pops-table-body">
-              <!-- Dynamic Injection -->
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="fm-table">
+              <thead>
+                <tr>
+                  <th>Kelompok Pop</th>
+                  <th>Jumlah</th>
+                  <th>Income Tier</th>
+                  <th>Kepuasan</th>
+                  <th>Kerusuhan</th>
+                  <th>Tuntutan Utama</th>
+                  <th>Status Tuntutan</th>
+                </tr>
+              </thead>
+              <tbody id="pops-table-body">
+                <!-- Dynamic Injection JS -->
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <!-- TAB 4: DIPLOMASI INTERNASIONAL -->
@@ -132,28 +135,34 @@
           <div class="fm-panel-header">HUBUNGAN INTERNASIONAL & LIGA NEGARA (13 NEGARA RIVAL)</div>
           
           <div class="fm-card mb-2">
-            <div class="stat-row">
-              <h4>DEWAN KEAMANAN PBB & MAJELIS VETO</h4>
+            <div class="stat-row" style="align-items: center;">
+              <div>
+                <strong>DEWAN KEAMANAN PBB & MAJELIS VETO</strong>
+                <p class="text-muted">Gunakan pengaruh diplomasi untuk menghapus sanksi PBB.</p>
+              </div>
               <button class="btn btn-primary" id="btn-call-un">Call UN Emergency Session ($50M)</button>
             </div>
           </div>
 
-          <table class="fm-table">
-            <thead>
-              <tr>
-                <th>Negara</th>
-                <th>Status</th>
-                <th>Perjanjian (Pact)</th>
-                <th>Relasi</th>
-                <th>Diplomatic Favor</th>
-                <th>Tindakan Diplomasi</th>
-              </tr>
-            </thead>
-            <tbody id="diplomacy-table-body">
-              <!-- Dynamic Injection -->
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="fm-table">
+              <thead>
+                <tr>
+                  <th>Negara</th>
+                  <th>Status</th>
+                  <th>Perjanjian (Pact)</th>
+                  <th>Relasi</th>
+                  <th>Diplomatic Favor</th>
+                  <th>Tindakan Diplomasi</th>
+                </tr>
+              </thead>
+              <tbody id="diplomacy-table-body">
+                <!-- Dynamic Injection JS -->
+              </tbody>
+            </table>
+          </div>
         </section>
+
       </main>
     </div>
   </div>
