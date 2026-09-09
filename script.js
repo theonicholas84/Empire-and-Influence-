@@ -1,5 +1,5 @@
 /* ===================================================
-   URZIKSTAN — State Manager Engine (Enhanced Edition)
+   URZIKSTAN — State Manager Engine (Expanded Edition)
    =================================================== */
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
@@ -11,6 +11,9 @@ const INITIAL_STATE = {
   
   treasury: 100000000,
   oilLevel: 1,
+  exportActive: true,
+  oilPricePerBarrel: 80,
+  
   nukeProgress: 0,
   coupThreat: 0,
   unSanctions: 0,
@@ -22,7 +25,18 @@ const INITIAL_STATE = {
   relUSA: 50,
   relUSSR: 50,
 
-  // --- Fitur Tambahan & Kabinet ---
+  // --- Kebijakan Pajak ---
+  taxRateSetting: "medium", // 'low', 'medium', 'high', 'extreme'
+
+  // --- Bangunan & Infrastruktur ---
+  buildings: {
+    infrastructure: 0,
+    hospitals: 0,
+    industry: 0,
+    garrisons: 0
+  },
+
+  // --- Kabinet ---
   blackMarketActive: false,
   ministers: {
     defense: { name: "Jend. Barkov", loyalty: 70 },
@@ -69,26 +83,66 @@ function gameLoop() {
     }
   }
 
-  // Pendapatan Minyak & Pasar Gelap
-  let oilIncome = 0;
-  if (game.unSanctions >= 100) {
-    if (game.blackMarketActive) {
-      oilIncome = (game.oilLevel * 5000000); // 50% pendapatan via pasar gelap
-      game.coupThreat += 0.2 * elapsed; // Risiko infiltrated meningkat
-    } else {
-      oilIncome = 0;
-    }
-  } else {
-    oilIncome = (game.oilLevel * 10000000) * (1 - (game.unSanctions / 100));
-  }
-  game.treasury += oilIncome * elapsed;
+  // 1. Kalkulasi Bonus Bangunan Infrastruktur
+  const infraMultiplier = 1 + (game.buildings.infrastructure * 0.15); // +15% per infra
 
-  // Akumulasi Risiko Kudeta
+  // 2. Kalkulasi Pendapatan Pajak
+  let baseTax = 2000000; // $2M dasar
+  let taxMultiplier = 1;
+  let taxPublicImpact = 0; // Efek ke dukungan rakyat per detik
+
+  if (game.taxRateSetting === "low") {
+    taxMultiplier = 0.5;
+    taxPublicImpact = 0.1; // Rakyat makin senang
+  } else if (game.taxRateSetting === "medium") {
+    taxMultiplier = 1.0;
+    taxPublicImpact = 0;
+  } else if (game.taxRateSetting === "high") {
+    taxMultiplier = 2.0;
+    taxPublicImpact = -0.3; // Rakyat tidak gembira
+  } else if (game.taxRateSetting === "extreme") {
+    taxMultiplier = 3.8;
+    taxPublicImpact = -0.8; // Amarah publik melonjak
+  }
+
+  // Tambahan dari Pabrik Industri
+  const industryIncome = game.buildings.industry * 3000000;
+  const totalTaxIncome = ((baseTax * taxMultiplier) + industryIncome) * infraMultiplier;
+
+  // 3. Kalkulasi Ekspor Minyak & Pasar Gelap
+  let oilIncome = 0;
+  if (game.exportActive) {
+    if (game.unSanctions >= 100) {
+      if (game.blackMarketActive) {
+        oilIncome = (game.oilLevel * 5000000) * infraMultiplier; // Pasar gelap 50%
+        game.coupThreat += 0.2 * elapsed;
+      } else {
+        oilIncome = 0; // Terembargo total
+      }
+    } else {
+      const baseOil = (game.oilLevel * 10000000);
+      const sanctionsPenalty = (1 - (game.unSanctions / 100));
+      oilIncome = baseOil * sanctionsPenalty * infraMultiplier;
+    }
+  }
+
+  // Tambah Pendapatan Total ke Kas Negara
+  const totalIncomePerSec = totalTaxIncome + oilIncome;
+  game.treasury += totalIncomePerSec * elapsed;
+
+  // 4. Efek Bangunan terhadap Stabilitas & Loyalitas
+  game.loyaltyPeople = Math.min(100, Math.max(0, game.loyaltyPeople + (taxPublicImpact * elapsed) + (game.buildings.hospitals * 0.2 * elapsed)));
+  game.loyaltyMilitary = Math.min(100, Math.max(0, game.loyaltyMilitary + (game.buildings.garrisons * 0.3 * elapsed)));
+
+  // 5. Akumulasi Risiko Kudeta
   let threatGain = 0;
   if (game.loyaltyMilitary < 40) threatGain += 2.0;
   if (game.loyaltyPeople < 30) threatGain += 3.0;
-  if (game.ministers.defense.loyalty < 40) threatGain += 2.5; // Ancaman menteri militer
+  if (game.ministers.defense.loyalty < 40) threatGain += 2.5;
+  if (game.taxRateSetting === "extreme") threatGain += 1.5;
+
   threatGain -= (game.cultOfPersonality * 0.02);
+  threatGain -= (game.buildings.garrisons * 0.2); // Pangkalan menekan kudeta
   if (threatGain < 0) threatGain = 0;
 
   game.coupThreat += threatGain * elapsed;
@@ -112,10 +166,10 @@ function gameLoop() {
     return;
   }
 
-  updateUI();
+  updateUI(totalTaxIncome, oilIncome);
 }
 
-// --- Events Pool ---
+// --- Dynamic Events ---
 const EVENTS = [
   {
     title: "⚠️ PEMBERONTAKAN MILISI AL-QATALA!",
@@ -188,6 +242,15 @@ function resolveEvent(opt) {
   document.getElementById("event-modal").classList.add("hidden");
 }
 
+function setTaxRate(rate) {
+  game.taxRateSetting = rate;
+  let label = "Sedang (15%)";
+  if (rate === "low") label = "Rendah (5%)";
+  if (rate === "high") label = "Tinggi (30%)";
+  if (rate === "extreme") label = "Ekstrem (50%)";
+  showToast(`📜 Tarif pajak diubah ke: ${label}`);
+}
+
 // --- Action Listeners ---
 function initEventListeners() {
   document.querySelectorAll(".fm-nav-btn").forEach(btn => {
@@ -201,12 +264,52 @@ function initEventListeners() {
     });
   });
 
+  // Fitur Upgrade Kilang
   document.getElementById("btn-upgrade-oil").onclick = () => {
     if (game.treasury >= 50000000) {
       game.treasury -= 50000000;
       game.oilLevel++;
       showToast("🛢️ Kilang di-upgrade!");
     } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // Fitur Bangunan Infrastruktur
+  document.getElementById("btn-build-infra").onclick = () => {
+    if (game.treasury >= 100000000) {
+      game.treasury -= 100000000;
+      game.buildings.infrastructure++;
+      showToast("🛣️ Infrastruktur logistik selesai dibangun!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  document.getElementById("btn-build-hospital").onclick = () => {
+    if (game.treasury >= 150000000) {
+      game.treasury -= 150000000;
+      game.buildings.hospitals++;
+      showToast("🏥 Rumah sakit publik beroperasi!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  document.getElementById("btn-build-industry").onclick = () => {
+    if (game.treasury >= 200000000) {
+      game.treasury -= 200000000;
+      game.buildings.industry++;
+      showToast("🏭 Kawasan industri dibuka!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  document.getElementById("btn-build-garrison").onclick = () => {
+    if (game.treasury >= 250000000) {
+      game.treasury -= 250000000;
+      game.buildings.garrisons++;
+      showToast("🏰 Pangkalan militer berdiri!");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // Toggle Ekspor
+  document.getElementById("btn-toggle-export").onclick = () => {
+    game.exportActive = !game.exportActive;
+    showToast(game.exportActive ? "🚢 Ekspor Minyak Diberlakukan" : "🛑 Ekspor Minyak Dihentikan");
   };
 
   document.getElementById("btn-statue").onclick = () => {
@@ -260,13 +363,12 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Zero-Sum Foreign Relations Mechanic
   document.getElementById("btn-align-usa").onclick = () => {
     if (game.treasury >= 40000000) {
       game.treasury -= 40000000;
       game.relUSA = Math.min(100, game.relUSA + 20);
       game.relUSSR = Math.max(0, game.relUSSR - 15);
-      showToast("🇺🇸 Aliansi AS diperkuat (USSR merenggang).");
+      showToast("🇺🇸 Aliansi AS diperkuat.");
     } else showToast("❌ Dana tidak cukup!");
   };
 
@@ -275,7 +377,7 @@ function initEventListeners() {
       game.treasury -= 40000000;
       game.relUSSR = Math.min(100, game.relUSSR + 20);
       game.relUSA = Math.max(0, game.relUSA - 15);
-      showToast("🛠️ Bantuan Soviet mendarat (AS merenggang).");
+      showToast("🛠️ Bantuan Soviet mendarat.");
     } else showToast("❌ Dana tidak cukup!");
   };
 
@@ -318,38 +420,48 @@ function triggerGameOver(reason) {
 function resetGame() {
   game = JSON.parse(JSON.stringify(INITIAL_STATE));
   document.getElementById("gameover-modal").classList.add("hidden");
-  updateUI();
+  updateUI(0, 0);
 }
 
 // --- UI Sync ---
-function updateUI() {
+function updateUI(calculatedTax = 0, calculatedOil = 0) {
   document.getElementById("top-date").innerText = `${Math.floor(game.day)} ${MONTHS[game.monthIndex]} ${game.year}`;
   document.getElementById("top-treasury").innerText = formatMoney(game.treasury);
   document.getElementById("top-sanctions").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("top-threat").innerText = `${Math.floor(game.coupThreat)}%`;
 
-  document.getElementById("val-military").innerText = `${game.loyaltyMilitary}%`;
+  document.getElementById("val-military").innerText = `${Math.floor(game.loyaltyMilitary)}%`;
   document.getElementById("bar-military").style.width = `${game.loyaltyMilitary}%`;
 
-  document.getElementById("val-people").innerText = `${game.loyaltyPeople}%`;
+  document.getElementById("val-people").innerText = `${Math.floor(game.loyaltyPeople)}%`;
   document.getElementById("bar-people").style.width = `${game.loyaltyPeople}%`;
 
-  document.getElementById("val-cult").innerText = `${game.cultOfPersonality}%`;
+  document.getElementById("val-cult").innerText = `${Math.floor(game.cultOfPersonality)}%`;
   document.getElementById("bar-cult").style.width = `${game.cultOfPersonality}%`;
 
-  document.getElementById("pop-mil-sat").innerText = `${game.loyaltyMilitary}%`;
-  document.getElementById("pop-peo-sat").innerText = `${game.loyaltyPeople}%`;
+  document.getElementById("pop-mil-sat").innerText = `${Math.floor(game.loyaltyMilitary)}%`;
+  document.getElementById("pop-peo-sat").innerText = `${Math.floor(game.loyaltyPeople)}%`;
 
   document.getElementById("oil-lvl-txt").innerText = `Level ${game.oilLevel}`;
-  
-  // Rate kalkulasi pendapatan
-  let incomeRate = 0;
-  if (game.unSanctions >= 100) {
-    incomeRate = game.blackMarketActive ? (game.oilLevel * 5) : 0;
-  } else {
-    incomeRate = (game.oilLevel * 10 * (1 - game.unSanctions/100));
-  }
-  document.getElementById("oil-income-txt").innerText = `+$${incomeRate.toFixed(1)}M / dtk`;
+  document.getElementById("oil-income-txt").innerText = `+$${calculatedOil.toFixed(1) / 1e6}M / dtk`;
+  document.getElementById("export-status-txt").innerText = game.exportActive ? (game.unSanctions >= 100 ? "Terembargo" : "Aktif") : "Diberhentikan";
+
+  // Updates Bangunan
+  document.getElementById("bld-infra-lvl").innerText = game.buildings.infrastructure;
+  document.getElementById("bld-hospital-lvl").innerText = game.buildings.hospitals;
+  document.getElementById("bld-industry-lvl").innerText = game.buildings.industry;
+  document.getElementById("bld-garrison-lvl").innerText = game.buildings.garrisons;
+
+  // Updates Pajak & Ekonomi
+  let taxLabel = "Sedang (15%)";
+  if (game.taxRateSetting === "low") taxLabel = "Rendah (5%)";
+  if (game.taxRateSetting === "high") taxLabel = "Tinggi (30%)";
+  if (game.taxRateSetting === "extreme") taxLabel = "Ekstrem (50%)";
+  document.getElementById("tax-rate-label").innerText = taxLabel;
+  document.getElementById("tax-income-txt").innerText = `+$${(calculatedTax / 1e6).toFixed(1)}M / dtk`;
+
+  document.getElementById("export-revenue-txt").innerText = `+$${(calculatedOil / 1e6).toFixed(1)}M / dtk`;
+  document.getElementById("export-cap-txt").innerText = `${game.oilLevel * 100.000} Barel/Hari`;
 
   document.getElementById("un-sanctions-text").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("bar-sanctions").style.width = `${game.unSanctions}%`;
@@ -360,11 +472,9 @@ function updateUI() {
   document.getElementById("rel-usa").innerText = `${game.relUSA}% (${game.relUSA > 60 ? 'Sekutu' : 'Netral'})`;
   document.getElementById("rel-ussr").innerText = `${game.relUSSR}% (${game.relUSSR > 60 ? 'Sekutu' : 'Netral'})`;
 
-  // Status Kabinet
   document.getElementById("min-def-loyalty").innerText = `${game.ministers.defense.loyalty}%`;
   document.getElementById("min-intel-loyalty").innerText = `${game.ministers.intel.loyalty}%`;
 
-  // Status Tombol Pasar Gelap
   const bmBtn = document.getElementById("btn-black-market");
   if (bmBtn) {
     bmBtn.innerText = game.blackMarketActive ? "Matikan Pasar Gelap" : "Aktifkan Pasar Gelap";
@@ -375,5 +485,5 @@ function updateUI() {
 window.onload = () => {
   initEventListeners();
   setInterval(gameLoop, 1000);
-  updateUI();
+  updateUI(0, 0);
 };
