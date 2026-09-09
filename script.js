@@ -443,7 +443,7 @@ function updateUI(calculatedTax = 0, calculatedOil = 0) {
   document.getElementById("pop-peo-sat").innerText = `${Math.floor(game.loyaltyPeople)}%`;
 
   document.getElementById("oil-lvl-txt").innerText = `Level ${game.oilLevel}`;
-  document.getElementById("oil-income-txt").innerText = `+$${calculatedOil.toFixed(1) / 1e6}M / dtk`;
+  document.getElementById("oil-income-txt").innerText = `+$${(calculatedOil / 1e6).toFixed(1)}M / dtk`;
   document.getElementById("export-status-txt").innerText = game.exportActive ? (game.unSanctions >= 100 ? "Terembargo" : "Aktif") : "Diberhentikan";
 
   // Updates Bangunan
@@ -461,7 +461,7 @@ function updateUI(calculatedTax = 0, calculatedOil = 0) {
   document.getElementById("tax-income-txt").innerText = `+$${(calculatedTax / 1e6).toFixed(1)}M / dtk`;
 
   document.getElementById("export-revenue-txt").innerText = `+$${(calculatedOil / 1e6).toFixed(1)}M / dtk`;
-  document.getElementById("export-cap-txt").innerText = `${game.oilLevel * 100.000} Barel/Hari`;
+  document.getElementById("export-cap-txt").innerText = `${(game.oilLevel * 100000).toLocaleString()} Barel/Hari`;
 
   document.getElementById("un-sanctions-text").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("bar-sanctions").style.width = `${game.unSanctions}%`;
