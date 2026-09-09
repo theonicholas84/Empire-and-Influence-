@@ -34,9 +34,9 @@
     </div>
   </div>
 
-  <!-- Main FM-Style Dashboard Layout -->
+  <!-- Dashboard Layout -->
   <div class="fm-app">
-    <!-- Top Information Bar -->
+    <!-- Top Bar -->
     <header class="fm-topbar">
       <div class="fm-club-info">
         <div class="fm-flag">🇸🇾</div>
@@ -66,14 +66,20 @@
       </div>
     </header>
 
+    <!-- World Event Banner Active Indicator -->
+    <div id="world-event-banner" class="world-event-banner hidden">
+      <span>🌍 <strong>EVENT DUNIA AKTIF:</strong> <span id="world-event-title">---</span> — <span id="world-event-desc">---</span></span>
+    </div>
+
     <div class="fm-body">
-      <!-- FM Navigation Sidebar -->
+      <!-- Sidebar Navigation -->
       <nav class="fm-sidebar">
         <div class="sidebar-category">RINGKASAN</div>
         <button class="fm-nav-btn active" data-tab="overview">📊 Ikhtisar Negara</button>
         <button class="fm-nav-btn" data-tab="pops">👥 Populasi & Faksi (Pops)</button>
 
-        <div class="sidebar-category">KEBIJAKAN</div>
+        <div class="sidebar-category">PEMBANGUNAN & KEBIJAKAN</div>
+        <button class="fm-nav-btn" data-tab="buildings">🏛️ Sistem Bangunan</button>
         <button class="fm-nav-btn" data-tab="laws">📜 Undang-Undang & Dekrit</button>
         <button class="fm-nav-btn" data-tab="diplomacy">🌐 Diplomasi & PBB</button>
 
@@ -134,7 +140,7 @@
           </div>
         </section>
 
-        <!-- TAB 2: POPS & FACTIONS (VICTORIA-STYLE) -->
+        <!-- TAB 2: POPS -->
         <section id="tab-pops" class="tab-content">
           <div class="fm-panel-header">ANALISIS KELOMPOK POPULASI (POPS)</div>
           <table class="fm-table">
@@ -173,7 +179,15 @@
           </table>
         </section>
 
-        <!-- TAB 3: LAWS & DECREES -->
+        <!-- TAB BARU: BUILDINGS -->
+        <section id="tab-buildings" class="tab-content">
+          <div class="fm-panel-header">SISTEM BANGUNAN & INVESTASI INFRASTRUKTUR</div>
+          <div id="building-list-container" class="fm-grid-3">
+            <!-- Diisi otomatis melalui renderBuildingsUI() di JS -->
+          </div>
+        </section>
+
+        <!-- TAB 3: LAWS -->
         <section id="tab-laws" class="tab-content">
           <div class="fm-panel-header">UNDANG-UNDANG & DEKRIT DARURAT</div>
           <div class="fm-grid-3">
@@ -188,7 +202,7 @@
               <h4>Subsidi Nasional</h4>
               <p class="text-muted">Sogok kelompok masyarakat bawah agar tidak demo.</p>
               <small class="text-success">+20% Dukungan Rakyat | -$30M Kas</small>
-              <button class="btn btn-primary btn-block mt-2" id="btn-decree-subsidy">Keluarkan Subsi ($30M)</button>
+              <button class="btn btn-primary btn-block mt-2" id="btn-decree-subsidy">Keluarkan Subsidi ($30M)</button>
             </div>
 
             <div class="fm-card">
@@ -200,7 +214,7 @@
           </div>
         </section>
 
-        <!-- TAB 4: DIPLOMACY & UN -->
+        <!-- TAB 4: DIPLOMACY -->
         <section id="tab-diplomacy" class="tab-content">
           <div class="fm-panel-header">HUBUNGAN INTERNASIONAL & AMBANG EMBARGO PBB</div>
           <div class="fm-card">
@@ -228,7 +242,7 @@
           </div>
         </section>
 
-        <!-- TAB 5: MILITARY & NUKE -->
+        <!-- TAB 5: MILITARY -->
         <section id="tab-military" class="tab-content">
           <div class="fm-panel-header">PROGRAM PERTAHANAN & NUKLIR</div>
           <div class="fm-card">
