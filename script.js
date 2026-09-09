@@ -1,10 +1,10 @@
 /* ===================================================
-   URZIKSTAN — State Manager Engine (Expanded Economy & Global Politics)
+   URZIKSTAN — Game Engine (Fixed & Fully Interactive)
    =================================================== */
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
 
-// --- 1. DATA SEKTOR & BANGUNAN EKONOMI ---
+// --- 1. DATA SEKTOR EKONOMI ---
 const ECONOMIC_SECTORS = {
   agriculture: {
     name: "Pertanian & Pangan",
@@ -14,8 +14,7 @@ const ECONOMIC_SECTORS = {
     baseCost: 20000000,
     costMultiplier: 1.4,
     baseIncome: 400000,
-    outputType: "food",
-    outputBase: 100 // Produce 100 Food/sec base
+    outputBase: 100
   },
   manufacturing: {
     name: "Manufaktur & Baja",
@@ -25,8 +24,7 @@ const ECONOMIC_SECTORS = {
     baseCost: 40000000,
     costMultiplier: 1.5,
     baseIncome: 800000,
-    outputType: "steel",
-    outputBase: 50 // Produce 50 Steel/sec base
+    outputBase: 50
   },
   services: {
     name: "Jasa & Perdagangan",
@@ -36,21 +34,20 @@ const ECONOMIC_SECTORS = {
     baseCost: 35000000,
     costMultiplier: 1.45,
     baseIncome: 600000,
-    outputType: "trade_value",
     outputBase: 200
   }
 };
 
-// --- 2. DATA POPS EKONOMI (Victoria 3 Style) ---
+// --- 2. DATA POPS EKONOMI ---
 const POPS_DATA = {
   military: {
     name: "💂 Jenderal & Perwira Militer",
     count: 120000,
     satisfaction: 70,
     politicalPower: 45,
-    incomeTier: 4, // Tier 1-5
-    wagePerPop: 150, // Total Wage multiplier
-    unrestLevel: 0, // 1-5
+    incomeTier: 4,
+    wagePerPop: 150,
+    unrestLevel: 0,
     demands: [
       { id: "d_arm", text: "Anggaran Alat Utama", met: true },
       { id: "d_press", text: "Pembersihan Oposisi", met: false },
@@ -89,60 +86,39 @@ const POPS_DATA = {
 
 // --- 3. DATA 13 NEGARA RIVAL & DIPLOMASI ---
 const COUNTRIES = {
-  usa: { name: "Amerika Serikat", flag: "🇺🇸", status: "Netral", pact: "None", relation: 50, favor: 0, power: "Superpower", unVeto: true },
-  ussr: { name: "Uni Soviet", flag: "🛠️", status: "Netral", pact: "None", relation: 50, favor: 0, power: "Superpower", unVeto: true },
-  uk: { name: "Inggris", flag: "🇬🇧", status: "Netral", pact: "None", relation: 45, favor: 0, power: "Major", unVeto: true },
-  france: { name: "Prancis", flag: "🇫🇷", status: "Netral", pact: "None", relation: 45, favor: 0, power: "Major", unVeto: true },
-  china: { name: "China", flag: "🇨🇳", status: "Netral", pact: "None", relation: 40, favor: 0, power: "Major", unVeto: true },
-  germany: { name: "Jerman Barat", flag: "🇩🇪", status: "Netral", pact: "None", relation: 50, favor: 0, power: "Regional", unVeto: false },
-  turkey: { name: "Turki", flag: "🇹🇷", status: "Netral", pact: "None", relation: 55, favor: 0, power: "Regional", unVeto: false },
-  saudi: { name: "Arab Saudi", flag: "🇸🇦", status: "Persahabatan", pact: "Trade Agreement", relation: 65, favor: 1, power: "Regional", unVeto: false },
-  azerbaijan: { name: "Azerbaijan", flag: "🇦🇿", status: "Persahabatan", pact: "Trade Agreement", relation: 60, favor: 0, power: "Minor", unVeto: false },
-  armenia: { name: "Armenia", flag: "🇦🇲", status: "Musuh", pact: "None", relation: 20, favor: 0, power: "Minor", unVeto: false },
-  iran: { name: "Iran", flag: "🇮🇷", status: "Netral", pact: "None", relation: 50, favor: 0, power: "Regional", unVeto: false },
-  iraq: { name: "Irak", flag: "🇮🇶", status: "Persahabatan", pact: "Non-Aggression", relation: 70, favor: 2, power: "Regional", unVeto: false },
-  syria: { name: "Suriah", flag: "🇸🇾", status: "Persahabatan", pact: "Non-Aggression", relation: 75, favor: 1, power: "Minor", unVeto: false }
+  usa: { name: "Amerika Serikat", flag: "🇺🇸", status: "Netral", pact: "None", relation: 50, favor: 0, unVeto: true },
+  ussr: { name: "Uni Soviet", flag: "🛠️", status: "Netral", pact: "None", relation: 50, favor: 0, unVeto: true },
+  uk: { name: "Inggris", flag: "🇬🇧", status: "Netral", pact: "None", relation: 45, favor: 0, unVeto: true },
+  france: { name: "Prancis", flag: "🇫🇷", status: "Netral", pact: "None", relation: 45, favor: 0, unVeto: true },
+  china: { name: "China", flag: "🇨🇳", status: "Netral", pact: "None", relation: 40, favor: 0, unVeto: true },
+  germany: { name: "Jerman Barat", flag: "🇩🇪", status: "Netral", pact: "None", relation: 50, favor: 0, unVeto: false },
+  turkey: { name: "Turki", flag: "🇹🇷", status: "Netral", pact: "None", relation: 55, favor: 0, unVeto: false },
+  saudi: { name: "Arab Saudi", flag: "🇸🇦", status: "Persahabatan", pact: "Trade Agreement", relation: 65, favor: 1, unVeto: false },
+  azerbaijan: { name: "Azerbaijan", flag: "🇦🇿", status: "Persahabatan", pact: "Trade Agreement", relation: 60, favor: 0, unVeto: false },
+  armenia: { name: "Armenia", flag: "🇦🇲", status: "Musuh", pact: "None", relation: 20, favor: 0, unVeto: false },
+  iran: { name: "Iran", flag: "🇮🇷", status: "Netral", pact: "None", relation: 50, favor: 0, unVeto: false },
+  iraq: { name: "Irak", flag: "🇮🇶", status: "Persahabatan", pact: "Non-Aggression", relation: 70, favor: 2, unVeto: false },
+  syria: { name: "Suriah", flag: "🇸🇾", status: "Persahabatan", pact: "Non-Aggression", relation: 75, favor: 1, unVeto: false }
 };
 
-// --- STATE UTAMA ---
-const INITIAL_STATE = {
+// --- STATE GAME ---
+let game = {
   day: 1,
   monthIndex: 0,
   year: 1960,
-  
   treasury: 150000000,
   oilLevel: 1,
-  nukeProgress: 0,
   coupThreat: 0,
   unSanctions: 0,
-  cultOfPersonality: 10,
-  
-  // Stok Sumber Daya (Resource Stocks)
-  resources: {
-    oil: 500,
-    steel: 200,
-    food: 1000
-  },
-
-  // Trade Routes Active
-  tradeRoutes: [
-    { id: 1, partner: "saudi", exportItem: "oil", importItem: "food", rate: 50 }
-  ],
-
+  resources: { oil: 500, steel: 200, food: 1000 },
   sectors: JSON.parse(JSON.stringify(ECONOMIC_SECTORS)),
   pops: JSON.parse(JSON.stringify(POPS_DATA)),
   countries: JSON.parse(JSON.stringify(COUNTRIES)),
-
-  historyOutput: [10, 12, 15, 14, 18, 22, 25], // Untuk grafik sederhana
-
-  activeEvent: null,
-  lastUpdate: Date.now(),
-  lastMonthCheck: Date.now()
+  historyOutput: [10, 12, 15, 14, 18, 22, 25],
+  lastUpdate: Date.now()
 };
 
-let game = JSON.parse(JSON.stringify(INITIAL_STATE));
-
-// --- HELPER FORMATTING ---
+// --- HELPER FORMAT & TOAST ---
 function formatMoney(val) {
   if (val >= 1e9) return "$" + (val / 1e9).toFixed(2) + "B";
   if (val >= 1e6) return "$" + (val / 1e6).toFixed(1) + "M";
@@ -151,6 +127,7 @@ function formatMoney(val) {
 
 function showToast(msg) {
   const container = document.getElementById("toast-container");
+  if (!container) return;
   const toast = document.createElement("div");
   toast.className = "toast";
   toast.innerText = msg;
@@ -159,13 +136,8 @@ function showToast(msg) {
 }
 
 // --- RUMUS SEKTOR EKONOMI ---
-function getSectorCost(s) {
-  return Math.floor(s.baseCost * Math.pow(s.costMultiplier, s.level));
-}
-
-function getSectorIncome(s) {
-  return s.baseIncome * s.level;
-}
+function getSectorCost(s) { return Math.floor(s.baseCost * Math.pow(s.costMultiplier, s.level)); }
+function getSectorIncome(s) { return s.baseIncome * s.level; }
 
 function getTotalWages() {
   let totalWage = 0;
@@ -176,7 +148,7 @@ function getTotalWages() {
   return totalWage;
 }
 
-// --- MAIN ENGINE LOOP ---
+// --- MAIN GAME LOOP ---
 function gameLoop() {
   const now = Date.now();
   const elapsed = (now - game.lastUpdate) / 1000;
@@ -194,61 +166,37 @@ function gameLoop() {
     }
   }
 
-  // Update Bulanan untuk Pops & Ekonomi
+  // Update Bulanan
   if (prevMonth !== game.monthIndex) {
     monthlyEconomyUpdate();
   }
 
-  // Akumulasi Finansial
-  let agriInc = getSectorIncome(game.sectors.agriculture);
-  let manufInc = getSectorIncome(game.sectors.manufacturing);
-  let servInc = getSectorIncome(game.sectors.services);
-  let oilInc = game.oilLevel * 10000000 * (1 - (game.unSanctions / 100));
+  // Finansial Kas
+  let totalIncome = getSectorIncome(game.sectors.agriculture) + 
+                    getSectorIncome(game.sectors.manufacturing) + 
+                    getSectorIncome(game.sectors.services) + 
+                    (game.oilLevel * 10000000 * (1 - (game.unSanctions / 100)));
 
-  let totalGrossIncome = agriInc + manufInc + servInc + oilInc;
-  let totalWages = getTotalWages();
-  let netCashflow = totalGrossIncome - totalWages;
-
+  let netCashflow = totalIncome - getTotalWages();
   game.treasury += netCashflow * elapsed;
 
-  // Produksi Resource Goods (Per Dtk)
+  // Produksi Barang Pasif
   game.resources.food += (game.sectors.agriculture.outputBase * game.sectors.agriculture.level) * elapsed * 0.1;
   game.resources.steel += (game.sectors.manufacturing.outputBase * game.sectors.manufacturing.level) * elapsed * 0.1;
   game.resources.oil += (game.oilLevel * 20) * elapsed * 0.1;
 
-  // Resource Trade Route Processing
-  processTradeRoutes(elapsed);
-
-  // Threat & Stability calculation
-  let avgSatisfaction = (game.pops.military.satisfaction + game.pops.laborers.satisfaction + game.pops.clergy.satisfaction) / 3;
-  if (avgSatisfaction < 40) game.coupThreat += 0.5 * elapsed;
-
+  // Check Game Over
   if (game.coupThreat >= 100) {
-    triggerGameOver("REVOLUSI SOSIAL! Unrest Pops meruntuhkan pemerintah.");
+    document.getElementById("go-reason").innerText = "REVOLUSI TOTAL! Unrest Pops meruntuhkan pimpinan negara.";
+    document.getElementById("gameover-modal").classList.remove("hidden");
     return;
   }
 
   updateUI();
 }
 
-// --- BULANAN: UPDATE POPS & KEBUTUHAN ---
 function monthlyEconomyUpdate() {
-  // Update Unrest & Satisfaction berdasarkan Pemenuhan Tuntutan
-  for (let key in game.pops) {
-    const pop = game.pops[key];
-    let metCount = pop.demands.filter(d => d.met).length;
-    let totalDemands = pop.demands.length;
-
-    if (metCount === totalDemands) {
-      pop.satisfaction = Math.min(100, pop.satisfaction + 4);
-      pop.unrestLevel = Math.max(0, pop.unrestLevel - 1);
-    } else {
-      pop.satisfaction = Math.max(0, pop.satisfaction - 5);
-      if (pop.satisfaction < 30) pop.unrestLevel = Math.min(5, pop.unrestLevel + 1);
-    }
-  }
-
-  // Push data ke grafik sederhana
+  // Push grafik
   const totalNetOutput = (getSectorIncome(game.sectors.agriculture) + getSectorIncome(game.sectors.manufacturing) + getSectorIncome(game.sectors.services)) / 1e6;
   game.historyOutput.push(Math.round(totalNetOutput));
   if (game.historyOutput.length > 10) game.historyOutput.shift();
@@ -257,30 +205,8 @@ function monthlyEconomyUpdate() {
   showToast("📅 Laporan Bulanan Ekonomi & Pops Diperbarui.");
 }
 
-// --- RESOURCE CONVERSION & TRADE ROUTES ---
-function processTradeRoutes(elapsed) {
-  game.tradeRoutes.forEach(tr => {
-    // Kurangi Barang Ekspor, Tambah Barang Impor
-    if (game.resources[tr.exportItem] >= tr.rate * elapsed) {
-      game.resources[tr.exportItem] -= tr.rate * elapsed;
-      game.resources[tr.importItem] += (tr.rate * 0.8) * elapsed; // 20% loss/tariff
-    }
-  });
-}
-
-function convertResource(fromItem, toItem, amount) {
-  if (game.resources[fromItem] >= amount) {
-    game.resources[fromItem] -= amount;
-    let ratio = (fromItem === 'oil' && toItem === 'steel') ? 0.5 : 1.2;
-    game.resources[toItem] += amount * ratio;
-    showToast(`🔄 Konversi berhasil: ${amount} ${fromItem} -> ${(amount * ratio).toFixed(0)} ${toItem}`);
-  } else {
-    showToast("❌ Stok barang tidak mencukupi!");
-  }
-}
-
-// --- UPGRADE SEKTOR ---
-function upgradeSector(sectorKey) {
+// --- AKSI & KLIK INTERAKTIF ---
+window.upgradeSector = function(sectorKey) {
   const sec = game.sectors[sectorKey];
   if (sec.level >= sec.maxLevel) {
     showToast("⚠️ Sektor sudah mencapai Level Maksimum!");
@@ -296,10 +222,9 @@ function upgradeSector(sectorKey) {
   } else {
     showToast("❌ Kas negara tidak mencukupi!");
   }
-}
+};
 
-// --- DIPLOMASI & RIVAL MECHANICS ---
-function actionDiplomacy(countryKey, actionType) {
+window.actionDiplomacy = function(countryKey, actionType) {
   const c = game.countries[countryKey];
   
   if (actionType === 'bribe') {
@@ -307,39 +232,48 @@ function actionDiplomacy(countryKey, actionType) {
       game.treasury -= 30000000;
       c.relation = Math.min(100, c.relation + 15);
       c.favor += 1;
-      showToast(`💰 Diplomasi suap ke ${c.name} berhasil (+1 Favor).`);
-    } else showToast("❌ Dana tidak cukup ($30M)!");
+      showToast(`💰 Suap ke ${c.name} berhasil (+1 Favor).`);
+    } else showToast("❌ Butuh $30M!");
   } 
   else if (actionType === 'alliance') {
-    if (game.treasury >= 50000000 && c.relation >= 70) {
+    if (game.treasury >= 50000000 && c.relation >= 60) {
       game.treasury -= 50000000;
       c.status = "Persahabatan";
       c.pact = "Military Alliance";
-      showToast(`⚔️ Aliansi Militer resmi dibentuk bersama ${c.name}!`);
-    } else showToast("❌ Butuh $50M & Relasi minimal 70.");
+      showToast(`⚔️ Aliansi Militer dibentuk bersama ${c.name}!`);
+    } else showToast("❌ Butuh $50M & Relasi minimal 60!");
   }
   else if (actionType === 'espionage') {
     if (game.treasury >= 20000000) {
       game.treasury -= 20000000;
-      let success = Math.random() > 0.3;
-      if (success) {
-        showToast(`🕵️ Intel Intelijen: ${c.name} memprediksi stabilitas Anda.`);
+      if (Math.random() > 0.4) {
+        showToast(`🕵️ Intel Operasi di ${c.name} Sukses!`);
       } else {
-        c.relation = Math.max(0, c.relation - 10);
-        showToast(`⚠️ Agen Intelijen tertangkap di ${c.name}! Relasi memburuk.`);
+        c.relation = Math.max(0, c.relation - 15);
+        showToast(`⚠️ Agen tertangkap di ${c.name}! Relasi memburuk.`);
       }
-    } else showToast("❌ Dana tidak cukup ($20M)!");
+    } else showToast("❌ Butuh $20M!");
+  }
+  renderDiplomacyUI();
+};
+
+function convertResource() {
+  if (game.resources.oil >= 100) {
+    game.resources.oil -= 100;
+    game.resources.steel += 50;
+    showToast("🔄 Konversi berhasil: 100 Minyak ➔ 50 Steel.");
+  } else {
+    showToast("❌ Stok Minyak tidak mencukupi!");
   }
 }
 
 function callUNSession() {
   if (game.treasury < 50000000) {
-    showToast("❌ Butuh $50M untuk menggelar Sidang Darurat PBB!");
+    showToast("❌ Butuh $50M untuk menggelar Sidang PBB!");
     return;
   }
   game.treasury -= 50000000;
 
-  // Cek bantuan Veto dari Superpower dengan Favor > 0
   let vetoSecured = false;
   for (let key in game.countries) {
     if (game.countries[key].unVeto && game.countries[key].favor > 0) {
@@ -354,11 +288,11 @@ function callUNSession() {
     showToast("🇺🇳 VETO DIPERGUNAKAN! Sanksi PBB dipotong 40%.");
   } else {
     game.unSanctions = Math.max(0, game.unSanctions - 15);
-    showToast("🇺🇳 Sidang PBB selesai. Sanksi berkurang 15%.");
+    showToast("🇺🇳 Sidang PBB Selesai. Sanksi berkurang 15%.");
   }
 }
 
-// --- RENDER UI DYNAMIC SECTIONS ---
+// --- RENDERERS ---
 function renderSectorsUI() {
   const container = document.getElementById("sector-list-container");
   if (!container) return;
@@ -372,16 +306,16 @@ function renderSectorsUI() {
     const card = document.createElement("div");
     card.className = "fm-card";
     card.innerHTML = `
-      <h4>${s.icon} ${s.name}</h4>
+      <div class="card-title">${s.icon} ${s.name}</div>
       <div class="stat-row mt-2">
         <span>Tingkat Sektor:</span>
         <span class="text-primary">Lvl ${s.level} / ${s.maxLevel}</span>
       </div>
       <div class="stat-row">
-        <span>Hasil Finansial:</span>
+        <span>Hasil Pasif:</span>
         <span class="text-success">+${formatMoney(inc)}/dtk</span>
       </div>
-      <button class="btn btn-primary btn-block mt-2" onclick="upgradeSector('${key}')">
+      <button class="btn btn-primary btn-block mt-2" onclick="window.upgradeSector('${key}')">
         Ekspansi Sektor (${formatMoney(cost)})
       </button>
     `;
@@ -396,11 +330,7 @@ function renderPopsUI() {
   tbody.innerHTML = "";
   for (let key in game.pops) {
     const p = game.pops[key];
-    
-    let demandsHTML = p.demands.map(d => 
-      `<span class="badge ${d.met ? 'bg-green' : 'bg-red'}">${d.text}</span>`
-    ).join(" ");
-
+    let demandsHTML = p.demands.map(d => `<span class="badge ${d.met ? 'bg-green' : 'bg-red'}">${d.text}</span>`).join(" ");
     let metCount = p.demands.filter(d => d.met).length;
 
     const tr = document.createElement("tr");
@@ -433,9 +363,9 @@ function renderDiplomacyUI() {
       <td>${c.relation}/100</td>
       <td>${c.favor} Favor</td>
       <td>
-        <button class="btn btn-secondary btn-sm" onclick="actionDiplomacy('${key}', 'bribe')">Suap ($30M)</button>
-        <button class="btn btn-primary btn-sm" onclick="actionDiplomacy('${key}', 'alliance')">Aliansi</button>
-        <button class="btn btn-danger btn-sm" onclick="actionDiplomacy('${key}', 'espionage')">Intel</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.actionDiplomacy('${key}', 'bribe')">Suap ($30M)</button>
+        <button class="btn btn-primary btn-sm" onclick="window.actionDiplomacy('${key}', 'alliance')">Aliansi</button>
+        <button class="btn btn-danger btn-sm" onclick="window.actionDiplomacy('${key}', 'espionage')">Intel</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -448,7 +378,7 @@ function renderGraph() {
   const ctx = canvas.getContext("2d");
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#10B981";
+  ctx.strokeStyle = "#00B069";
   ctx.lineWidth = 3;
   ctx.beginPath();
 
@@ -465,48 +395,42 @@ function renderGraph() {
   ctx.stroke();
 }
 
-// --- INIT LISTENERS & SYNC ---
-function initEventListeners() {
-  document.querySelectorAll(".fm-nav-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".fm-nav-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-      
-      e.target.classList.add("active");
-      const tabId = e.target.getAttribute("data-tab");
-      document.getElementById(`tab-${tabId}`).classList.add("active");
-    });
-  });
-
-  document.getElementById("btn-call-un").onclick = callUNSession;
-  document.getElementById("btn-convert-oil").onclick = () => convertResource('oil', 'steel', 100);
-}
-
-function triggerGameOver(reason) {
-  document.getElementById("go-reason").innerText = reason;
-  document.getElementById("gameover-modal").classList.remove("hidden");
-}
-
 function updateUI() {
   document.getElementById("top-date").innerText = `${Math.floor(game.day)} ${MONTHS[game.monthIndex]} ${game.year}`;
   document.getElementById("top-treasury").innerText = formatMoney(game.treasury);
   document.getElementById("top-sanctions").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("top-threat").innerText = `${Math.floor(game.coupThreat)}%`;
 
-  // Resources
   document.getElementById("res-oil").innerText = `${Math.floor(game.resources.oil)} Barrel`;
   document.getElementById("res-steel").innerText = `${Math.floor(game.resources.steel)} Ton`;
   document.getElementById("res-food").innerText = `${Math.floor(game.resources.food)} Ton`;
-
-  renderPopsUI();
-  renderDiplomacyUI();
 }
 
-window.onload = () => {
-  initEventListeners();
+// --- SETUP EVENT LISTENERS & INITIALIZATION ---
+function init() {
+  // Navigasi Tab FM Style
+  document.querySelectorAll(".fm-nav-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".fm-nav-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+      
+      const targetBtn = e.target;
+      targetBtn.classList.add("active");
+      const tabId = targetBtn.getAttribute("data-tab");
+      document.getElementById(`tab-${tabId}`).classList.add("active");
+    });
+  });
+
+  // Action Buttons
+  document.getElementById("btn-convert-oil").onclick = convertResource;
+  document.getElementById("btn-call-un").onclick = callUNSession;
+
   renderSectorsUI();
   renderPopsUI();
   renderDiplomacyUI();
+  renderGraph();
+
   setInterval(gameLoop, 1000);
-  updateUI();
-};
+}
+
+window.onload = init;
