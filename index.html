@@ -14,11 +14,11 @@
   <div id="event-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">⚠️ INSIDEN KEAMANAN NASIONAL</div>
-      <h3 id="ev-title" class="text-danger">PEMBERONTAKAN MILISI AL-QATALA</h3>
-      <p id="ev-desc" class="text-muted">Pemberontak mengepung kawasan kilang minyak utama.</p>
+      <h3 id="ev-title" class="text-danger">KERUSUHAN SOSIAL</h3>
+      <p id="ev-desc" class="text-muted">Kepuasan rakyat melorot memicu demonstrasi anarkis.</p>
       <div class="event-actions">
-        <button class="btn btn-primary btn-block mt-2" id="ev-btn1">Kirim Pasukan Khusus ($20M)</button>
-        <button class="btn btn-secondary btn-block mt-2" id="ev-btn2">Bayar Tebusan ($50M)</button>
+        <button class="btn btn-primary btn-block mt-2" id="ev-btn1">Tumpas dengan Pasukan Khusus ($20M)</button>
+        <button class="btn btn-secondary btn-block mt-2" id="ev-btn2">Bagi Bantuan Sosial Darurat ($50M)</button>
         <button class="btn btn-danger btn-block mt-2" id="ev-btn3">Abaikan Saja</button>
       </div>
     </div>
@@ -44,7 +44,7 @@
         </div>
       </div>
 
-      <!-- Top Resources Indicator Bar -->
+      <!-- Top Resources Bar -->
       <div class="fm-top-stats">
         <div class="fm-stat-box highlight-pop">
           <span class="label">POPULASI</span>
@@ -53,6 +53,10 @@
         <div class="fm-stat-box">
           <span class="label">KAS (TREASURY)</span>
           <span class="value text-success" id="top-treasury">$100M</span>
+        </div>
+        <div class="fm-stat-box highlight-tech">
+          <span class="label">TECH POINTS</span>
+          <span class="value text-warning" id="top-techpoints">0 TP</span>
         </div>
         <div class="fm-stat-box highlight-food">
           <span class="label">MAKANAN</span>
@@ -85,6 +89,7 @@
       <nav class="fm-sidebar">
         <div class="sidebar-category">RINGKASAN</div>
         <button class="fm-nav-btn active" data-tab="overview">📊 Ikhtisar Negara</button>
+        <button class="fm-nav-btn" data-tab="techtree">💡 Tech Tree & Riset</button> <!-- NEW NAV ITEM -->
         <button class="fm-nav-btn" data-tab="buildings">🏗️ Pembangunan & Kota</button>
         <button class="fm-nav-btn" data-tab="economy">💰 Revenue & Finance (Victoria)</button>
         <button class="fm-nav-btn" data-tab="pops">👥 Populasi & Faksi (Pops)</button>
@@ -182,13 +187,23 @@
           </div>
         </section>
 
+        <!-- TAB NEW: TECH TREE -->
+        <section id="tab-techtree" class="tab-content">
+          <div class="fm-panel-header">POHON TEKNOLOGI & RISET LINTAS ERA</div>
+          <p class="text-muted mb-2">Tech Points (TP) susah didapatkan dan hanya diproduksi oleh <strong>Sekolah</strong> dan <strong>Universitas</strong>. Kembangkan teknologi untuk membuka kemajuan industri.</p>
+          
+          <div class="fm-grid-2 mt-2" id="tech-tree-list">
+            <!-- Tech Tree diproduksi dinamis dari script.js -->
+          </div>
+        </section>
+
         <!-- TAB 2: BUILDINGS -->
         <section id="tab-buildings" class="tab-content">
           <div class="fm-panel-header">PROYEK INFRASTRUKTUR & BANGUNAN KOTA</div>
           <p class="text-muted mb-2">Investasikan kas negara untuk perluasan sektor ekonomi, transportasi, dan pendidikan.</p>
           
           <div class="fm-grid-2 mt-2">
-            <!-- JALAN RAYA / INFRASTRUKTUR -->
+            <!-- JALAN RAYA -->
             <div class="fm-card">
               <h4>🛣️ Jaringan Jalan Transportasi</h4>
               <p class="text-muted mt-2">Tingkatkan efisiensi logistik negara dari Jalan Tanah hingga Jalan Tol.</p>
@@ -203,7 +218,7 @@
               <button class="btn btn-primary btn-block mt-2" id="btn-upgrade-road">Upgrade Jalan ($80M)</button>
             </div>
 
-            <!-- PERTANIAN (FARM) & LOGISTIK MAKANAN -->
+            <!-- PERTANIAN (FARM) -->
             <div class="fm-card">
               <h4>🌾 Pertanian & Resources Makanan (Farm)</h4>
               <p class="text-muted mt-2">Menyuplai bahan pangan rakyat. Mencegah krisis kelaparan & menaikkan kepuasan rakyat.</p>
@@ -232,13 +247,35 @@
 
             <!-- SEKOLAH -->
             <div class="fm-card">
-              <h4>🏫 Sekolah & Akademi Negara</h4>
-              <p class="text-muted mt-2">Mendidik generasi muda sesuai doktrin rezim, meningkatkan *Cult of Personality* secara konstan.</p>
+              <h4>🏫 Sekolah & Akademi Dasar</h4>
+              <p class="text-muted mt-2">Mendidik generasi muda, meningkatkan Cult of Personality, serta menghasilkan Tech Points (TP) lambat.</p>
               <div class="stat-row mt-2">
                 <span>Jumlah Sekolah:</span>
                 <span id="bld-school-lvl" class="text-primary">0</span>
               </div>
               <button class="btn btn-primary btn-block mt-2" id="btn-build-school">Bangun Sekolah ($60M)</button>
+            </div>
+
+            <!-- NEW: UNIVERSITAS -->
+            <div class="fm-card">
+              <h4>🎓 Universitas Riset & Teknologi</h4>
+              <p class="text-muted mt-2">Pusat riset sains kelas tinggi. Menghasilkan Tech Points (TP) jauh lebih tinggi dibanding Sekolah biasa.</p>
+              <div class="stat-row mt-2">
+                <span>Jumlah Universitas:</span>
+                <span id="bld-uni-lvl" class="text-warning">0</span>
+              </div>
+              <button class="btn btn-primary btn-block mt-2" id="btn-build-uni">Pendirian Universitas ($200M)</button>
+            </div>
+
+            <!-- NEW: PELABUHAN -->
+            <div class="fm-card">
+              <h4>⚓ Pelabuhan Internasional</h4>
+              <p class="text-muted mt-2">Memperluas kapasitas dermaga ekspor-impor komoditas minyak & batubara serta devisa maritim.</p>
+              <div class="stat-row mt-2">
+                <span>Jumlah Pelabuhan:</span>
+                <span id="bld-port-lvl" class="text-success">0</span>
+              </div>
+              <button class="btn btn-primary btn-block mt-2" id="btn-build-port">Bangun Pelabuhan ($180M)</button>
             </div>
 
             <!-- TAMBANG BATUBARA -->
@@ -270,7 +307,6 @@
           <div class="fm-panel-header">SISTEM KEUANGAN & BALANCE NERACA (MEKANIK VICTORIA)</div>
           
           <div class="fm-grid-2">
-            <!-- REVENUE & EXPENSES PANEL (VICTORIA) -->
             <div class="fm-card">
               <div class="card-title text-success">📈 REVENUE & PRODUKSI KOMODITAS</div>
               <div class="stat-row mt-2">
@@ -280,6 +316,10 @@
               <div class="stat-row mt-2">
                 <span>Bank & Dividen Keuangan:</span>
                 <span id="vic-rev-bank" class="text-success">$0.0M / dtk</span>
+              </div>
+              <div class="stat-row mt-2">
+                <span>Pelabuhan & Devisa Maritim:</span>
+                <span id="vic-rev-port" class="text-success">$0.0M / dtk</span>
               </div>
               <div class="stat-row mt-2">
                 <span>Pendapatan Ekspor Minyak:</span>
@@ -296,11 +336,11 @@
                 <span id="vic-exp-subsidi" class="text-danger">$10.0M / dtk</span>
               </div>
               <div class="stat-row mt-2">
-                <span>Operasional Sekolah & Garnisun:</span>
+                <span>Operasional Sekolah, Uni & Garnisun:</span>
                 <span id="vic-exp-sekolah" class="text-danger">$0.0M / dtk</span>
               </div>
               <div class="stat-row mt-2">
-                <span>Logistik Makanan (Perawatan Farm):</span>
+                <span>Logistik Makanan & Perawatan Pelabuhan:</span>
                 <span id="vic-exp-makanan" class="text-danger">$2.0M / dtk</span>
               </div>
               <div class="stat-row mt-2" style="border-top: 1px solid #283245; padding-top: 5px;">
@@ -308,14 +348,12 @@
                 <strong id="vic-exp-total" class="text-danger">$12.0M / dtk</strong>
               </div>
 
-              <!-- NERACA / BALANCE -->
               <div class="fm-stat-box mt-2 text-center" style="padding: 1rem; background: #0B0E14;">
                 <span class="label">NET BALANCE (SURPLUS / DEFISIT)</span>
                 <span class="value text-danger" id="vic-net-balance" style="font-size: 1.2rem;">-$10.0M / dtk</span>
               </div>
             </div>
 
-            <!-- PENGATURAN PAJAK & PERDAGANGAN -->
             <div class="fm-card">
               <div class="card-title">KEBIJAKAN TARIF PAJAK NASIONAL</div>
               <p class="text-muted">Atur besaran pemajakan pada rakyat dan pelaku usaha untuk mendanai negara.</p>
@@ -347,7 +385,7 @@
           </div>
         </section>
 
-        <!-- TAB 4: POPS & POPULATION DYNAMICS -->
+        <!-- TAB 4: POPS -->
         <section id="tab-pops" class="tab-content">
           <div class="fm-panel-header">ANALISIS POPULASI & DINAMIKA PERTUMBUHAN BULANAN</div>
 
@@ -450,7 +488,7 @@
           </div>
         </section>
 
-        <!-- TAB 6: DIPLOMACY & PASAR GELAP -->
+        <!-- TAB 6: DIPLOMACY -->
         <section id="tab-diplomacy" class="tab-content">
           <div class="fm-panel-header">HUBUNGAN INTERNASIONAL & AMBANG EMBARGO PBB</div>
           <div class="fm-card">
@@ -495,10 +533,10 @@
               <span id="nuke-status-txt" class="text-danger">0%</span>
             </div>
             <div class="bar-bg"><div class="bar-fill bg-red" id="bar-nuke" style="width: 0%;"></div></div>
-            <p class="text-muted mt-2">⚠️ Membutuhkan 50 Ton Uranium dan $100M untuk tiap tahapan pengujian.</p>
+            <p class="text-muted mt-2">⚠️ Membutuhkan Uranium dan $100M untuk tiap tahapan pengujian.</p>
             <br>
             <button class="btn btn-warning" id="btn-mine-uranium">Eksplorasi Uranium ($80M)</button>
-            <button class="btn btn-danger" id="btn-develop-nuke">Uji Coba Senjata Nuklir ($100M + 50 Ton Uranium)</button>
+            <button class="btn btn-danger" id="btn-develop-nuke">Uji Coba Senjata Nuklir ($100M)</button>
           </div>
         </section>
 
