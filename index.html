@@ -44,20 +44,29 @@
         </div>
       </div>
 
+      <!-- Top Resources Indicator Bar -->
       <div class="fm-top-stats">
         <div class="fm-stat-box">
-          <span class="label">KAS NEGARA</span>
+          <span class="label">KAS (DOLLAR)</span>
           <span class="value text-success" id="top-treasury">$100M</span>
         </div>
         <div class="fm-stat-box">
-          <span class="label">LEMBAGA PBB</span>
-          <span class="value text-warning" id="top-sanctions">0%</span>
+          <span class="label">STOK MINYAK</span>
+          <span class="value text-warning" id="top-oil">1,000 Bbl</span>
         </div>
         <div class="fm-stat-box">
+          <span class="label">BATUBARA</span>
+          <span class="value text-primary" id="top-coal">500 Ton</span>
+        </div>
+        <div class="fm-stat-box">
+          <span class="label">URANIUM</span>
+          <span class="value text-danger" id="top-uranium">0 Ton</span>
+        </div>
+        <div class="fm-stat-box highlight">
           <span class="label">RESIKO KUDETA</span>
           <span class="value text-danger" id="top-threat">0%</span>
         </div>
-        <div class="fm-stat-box highlight">
+        <div class="fm-stat-box">
           <span class="label">TANGGAL</span>
           <span class="value" id="top-date">1 JAN 1960</span>
         </div>
@@ -109,18 +118,18 @@
             </div>
 
             <div class="fm-card">
-              <div class="card-title">PRODUKSI MINYAK & EKSPOR</div>
-              <p class="text-muted">Sumber modal utama pembiayaan rezim Urzikstan.</p>
+              <div class="card-title">PRODUKSI KILANG MINYAK</div>
+              <p class="text-muted">Minyak diproduksi ke gudang. Harus diekspor untuk menjadi Dollar.</p>
               <div class="stat-row mt-2">
-                <span>Tingkat Kilang</span>
+                <span>Tingkat Kilang:</span>
                 <span id="oil-lvl-txt">Level 1</span>
               </div>
               <div class="stat-row">
-                <span>Pendapatan Minyak</span>
-                <span id="oil-income-txt" class="text-success">+$10.0M / dtk</span>
+                <span>Laju Produksi:</span>
+                <span id="oil-rate-txt" class="text-warning">+100 Bbl / dtk</span>
               </div>
               <div class="stat-row">
-                <span>Status Ekspor</span>
+                <span>Status Auto-Ekspor:</span>
                 <span id="export-status-txt" class="text-primary">Aktif</span>
               </div>
               <br>
@@ -165,47 +174,81 @@
           </div>
         </section>
 
-        <!-- TAB BARU: BUILDINGS -->
+        <!-- TAB 2: BUILDINGS -->
         <section id="tab-buildings" class="tab-content">
           <div class="fm-panel-header">PROYEK INFRASTRUKTUR & BANGUNAN KOTA</div>
-          <p class="text-muted mb-2">Investasikan kas negara untuk pembangunan jangka panjang demi stabilitas dan pendapatan ekosistem rezim.</p>
+          <p class="text-muted mb-2">Investasikan kas negara untuk perluasan sektor ekonomi, transportasi, dan pendidikan.</p>
           
           <div class="fm-grid-2 mt-2">
+            <!-- JALAN RAYA / INFRASTRUKTUR -->
             <div class="fm-card">
-              <h4>🛣️ Pelabuhan & Infrastruktur Logistik</h4>
-              <p class="text-muted mt-2">Meningkatkan kapasitas distribusi logistik. Memberi bonus +15% pada seluruh hasil pajak & hasil minyak ekspor.</p>
+              <h4>🛣️ Jaringan Jalan Transportasi</h4>
+              <p class="text-muted mt-2">Tingkatkan efisiensi logistik negara dari Jalan Tanah hingga Jalan Tol.</p>
               <div class="stat-row mt-2">
-                <span>Jumlah Diterapkan:</span>
-                <span id="bld-infra-lvl" class="text-primary">0</span>
+                <span>Tingkat Jalan Saat Ini:</span>
+                <span id="road-level-txt" class="text-primary">Jalan Tanah (Lvl 0)</span>
               </div>
-              <button class="btn btn-primary btn-block mt-2" id="btn-build-infra">Bangun Infrastruktur ($100M)</button>
+              <div class="stat-row">
+                <span>Bonus Logistik Pajak/Ekspor:</span>
+                <span id="road-bonus-txt" class="text-success">+0%</span>
+              </div>
+              <button class="btn btn-primary btn-block mt-2" id="btn-upgrade-road">Upgrade Jalan ($80M)</button>
             </div>
 
+            <!-- PERTANIAN (FARM) -->
             <div class="fm-card">
-              <h4>🏥 Rumah Sakit & Fasilitas Publik</h4>
-              <p class="text-muted mt-2">Meningkatkan kesejahteraan sosial. Secara bertahap menaikkan kepuasan rakyat (+0.2%/dtk per unit) dan menekan kudeta.</p>
+              <h4>🌾 Pertanian & Kolektif Pangan (Farm)</h4>
+              <p class="text-muted mt-2">Menjamin ketahanan pangan rakyat. Secara bertahap menaikkan kepuasan rakyat (+0.3%/dtk per unit).</p>
               <div class="stat-row mt-2">
-                <span>Jumlah Diterapkan:</span>
-                <span id="bld-hospital-lvl" class="text-success">0</span>
+                <span>Jumlah Ladang:</span>
+                <span id="bld-farm-lvl" class="text-success">0</span>
               </div>
-              <button class="btn btn-primary btn-block mt-2" id="btn-build-hospital">Bangun Rumah Sakit ($150M)</button>
+              <button class="btn btn-primary btn-block mt-2" id="btn-build-farm">Bangun Ladang Pertanian ($40M)</button>
             </div>
 
+            <!-- BANK NASIONAL -->
             <div class="fm-card">
-              <h4>🏭 Kawasan Industri Berat & Semen</h4>
-              <p class="text-muted mt-2">Membuka lapangan kerja dan industri manufaktur lokal. Menambah pendapatan pajak langsung +$3.0M/dtk.</p>
+              <h4>🏦 BankSentral & Sektor Keuangan</h4>
+              <p class="text-muted mt-2">Menghasilkan devisa kas pasif per detik dan memperkuat stabilitas moneter negara.</p>
               <div class="stat-row mt-2">
-                <span>Jumlah Diterapkan:</span>
-                <span id="bld-industry-lvl" class="text-warning">0</span>
+                <span>Jumlah Cabang Bank:</span>
+                <span id="bld-bank-lvl" class="text-warning">0</span>
               </div>
-              <button class="btn btn-primary btn-block mt-2" id="btn-build-industry">Bangun Pabrik Industri ($200M)</button>
+              <div class="stat-row">
+                <span>Hasil Pasif Deviden:</span>
+                <span id="bank-income-txt" class="text-success">+$0.0M / dtk</span>
+              </div>
+              <button class="btn btn-primary btn-block mt-2" id="btn-build-bank">Mendirikan Bank ($120M)</button>
             </div>
 
+            <!-- SEKOLAH -->
+            <div class="fm-card">
+              <h4>🏫 Sekolah & Akademi Negara</h4>
+              <p class="text-muted mt-2">Mendidik generasi muda sesuai doktrin rezim, meningkatkan *Cult of Personality* secara konstan.</p>
+              <div class="stat-row mt-2">
+                <span>Jumlah Sekolah:</span>
+                <span id="bld-school-lvl" class="text-primary">0</span>
+              </div>
+              <button class="btn btn-primary btn-block mt-2" id="btn-build-school">Bangun Sekolah ($60M)</button>
+            </div>
+
+            <!-- TAMBANG BATUBARA -->
+            <div class="fm-card">
+              <h4>⛏️ Tambang Batubara Industri</h4>
+              <p class="text-muted mt-2">Menghasilkan sumber daya Batubara (Coal) untuk energi pabrik dan ekspor.</p>
+              <div class="stat-row mt-2">
+                <span>Jumlah Tambang:</span>
+                <span id="bld-coalmine-lvl" class="text-warning">0</span>
+              </div>
+              <button class="btn btn-primary btn-block mt-2" id="btn-build-coalmine">Buka Tambang Batubara ($70M)</button>
+            </div>
+
+            <!-- KAMP MILITER -->
             <div class="fm-card">
               <h4>🏰 Pangkalan Militer Strategis</h4>
-              <p class="text-muted mt-2">Memperkuat kehadiran militer di daerah. Meningkatkan loyalitas tentara (+0.3%/dtk) dan memperlambat kudeta.</p>
+              <p class="text-muted mt-2">Memperkuat kehadiran militer di daerah. Meningkatkan loyalitas tentara dan memperlambat kudeta.</p>
               <div class="stat-row mt-2">
-                <span>Jumlah Diterapkan:</span>
+                <span>Jumlah Pangkalan:</span>
                 <span id="bld-garrison-lvl" class="text-danger">0</span>
               </div>
               <button class="btn btn-primary btn-block mt-2" id="btn-build-garrison">Bangun Pangkalan ($250M)</button>
@@ -213,9 +256,9 @@
           </div>
         </section>
 
-        <!-- TAB BARU: ECONOMY & TAXES -->
+        <!-- TAB 3: ECONOMY & TAXES -->
         <section id="tab-economy" class="tab-content">
-          <div class="fm-panel-header">MANAJEMEN PERPAJAKAN & PERDAGANGAN MINYAK</div>
+          <div class="fm-panel-header">MANAJEMEN PERPAJAKAN & PERDAGANGAN KOMODITAS</div>
           
           <div class="fm-grid-2">
             <!-- PENGATURAN PAJAK -->
@@ -240,26 +283,28 @@
               </div>
             </div>
 
-            <!-- EKSPOR MINYAK -->
+            <!-- PASAR EKSPOR MINYAK & ASET -->
             <div class="fm-card">
-              <div class="card-title">SISTEM EKSPOR MINYAK MENTAH</div>
-              <p class="text-muted">Jual minyak ke pasar global demi modal tunai masif. Terpengaruh sanksi embargo PBB.</p>
+              <div class="card-title">SISTEM PERDAGANGAN MINYAK & SUMBER DAYA</div>
+              <p class="text-muted">Minyak mentah di gudang harus dijual/diekspor ke pasar global untuk menghasilkan Dollar.</p>
               
               <div class="stat-row mt-2">
-                <span>Kapasitas Ekspor:</span>
-                <span id="export-cap-txt">100.000 Barel/Hari</span>
+                <span>Stok Minyak Mentah:</span>
+                <span id="oil-stock-txt" class="text-warning">1.000 Bbl</span>
               </div>
               <div class="stat-row">
-                <span>Harga Pasar Dunia:</span>
+                <span>Harga Minyak Global:</span>
                 <span id="oil-price-txt" class="text-success">$80 / Barel</span>
               </div>
               <div class="stat-row">
-                <span>Total Ekspor Bersih:</span>
-                <span id="export-revenue-txt" class="text-success">+$10.0M / dtk</span>
+                <span>Pendapatan Ekspor (Otomatis):</span>
+                <span id="export-revenue-txt" class="text-success">+$0.0M / dtk</span>
               </div>
 
               <div class="mt-2">
-                <button class="btn btn-primary btn-block mt-2" id="btn-toggle-export">Toggle Izin Ekspor Minyak</button>
+                <button class="btn btn-primary btn-block mt-2" id="btn-toggle-export">Toggle Auto-Ekspor Minyak</button>
+                <button class="btn btn-secondary btn-block mt-2" id="btn-manual-export">Jual Seluruh Stok Minyak Instan</button>
+                <button class="btn btn-secondary btn-block mt-2" id="btn-export-coal">Ekspor 500 Ton Batubara ($15M)</button>
               </div>
             </div>
           </div>
@@ -362,17 +407,24 @@
 
         <!-- TAB 7: MILITARY -->
         <section id="tab-military" class="tab-content">
-          <div class="fm-panel-header">PROGRAM PERTAHANAN & NUKLIR</div>
+          <div class="fm-panel-header">PROGRAM PERTAHANAN & URANIUM NUKLIR</div>
           <div class="fm-card">
-            <h4>Pengembangan Hulu Ledak Nuklir ☢️</h4>
+            <h4>Tambang Uranium & Pengembangan Nuklir ☢️</h4>
+            <p class="text-muted mt-2">Eksplorasi material Uranium murni untuk riset senjata pemusnah massal.</p>
+            
             <div class="stat-row mt-2">
-              <span>Progres Nuklir</span>
+              <span>Stok Uranium Nasional:</span>
+              <span id="uranium-stock-txt" class="text-danger">0 Ton</span>
+            </div>
+            <div class="stat-row">
+              <span>Progres Riset Nuklir:</span>
               <span id="nuke-status-txt" class="text-danger">0%</span>
             </div>
             <div class="bar-bg"><div class="bar-fill bg-red" id="bar-nuke" style="width: 0%;"></div></div>
-            <p class="text-muted mt-2">⚠️ Pengujian merusak reputasi PBB secara signifikan (+25% Sanksi PBB).</p>
+            <p class="text-muted mt-2">⚠️ Membutuhkan 50 Ton Uranium dan $100M untuk tiap tahapan pengujian.</p>
             <br>
-            <button class="btn btn-danger" id="btn-develop-nuke">Danai Uji Coba Nuklir ($100M)</button>
+            <button class="btn btn-warning" id="btn-mine-uranium">Eksplorasi Uranium ($80M)</button>
+            <button class="btn btn-danger" id="btn-develop-nuke">Uji Coba Senjata Nuklir ($100M + 50 Ton Uranium)</button>
           </div>
         </section>
 
