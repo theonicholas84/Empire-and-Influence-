@@ -1,24 +1,29 @@
 /* ===================================================
-   URZIKSTAN STATE MANAGER — FOOTBALL MANAGER THEME
+   URZIKSTAN STATE MANAGER — ORIGINAL DASHBOARD THEME
    =================================================== */
 
 :root {
-  --bg-dark: #0f141d;
-  --panel-bg: #18202c;
-  --card-bg: #1e293b;
-  --border-color: #283245;
+  --bg-dark: #0b0f17;
+  --panel-bg: #111823;
+  --card-bg: #161e2c;
+  --card-border: #232d3f;
+  --border-color: #1e2736;
+  
   --text-main: #e2e8f0;
-  --text-muted: #94a3b8;
+  --text-muted: #8a99ad;
+  --text-light: #94a3b8;
   
   --accent-gold: #f59e0b;
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
-  --success-color: #10b981;
-  --danger-color: #ef4444;
-  --warning-color: #f59e0b;
+  --primary-blue: #2563eb;
+  --primary-blue-hover: #1d4ed8;
   
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --stat-green: #10b981;
+  --stat-orange: #f59e0b;
+  --stat-cyan: #38bdf8;
+  --stat-red: #ef4444;
+  
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
 }
 
 * {
@@ -37,18 +42,7 @@ body {
   user-select: none;
 }
 
-/* --- Emergency Mode (Efek Kudeta > 75%) --- */
-body.emergency-mode {
-  animation: pulse-red 2s infinite;
-}
-
-@keyframes pulse-red {
-  0% { box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.2); }
-  50% { box-shadow: inset 0 0 80px rgba(239, 68, 68, 0.6); }
-  100% { box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.2); }
-}
-
-/* --- Main Layout App --- */
+/* --- App Layout --- */
 .fm-app {
   display: flex;
   flex-direction: column;
@@ -58,13 +52,12 @@ body.emergency-mode {
 /* --- Top Navigation Bar --- */
 .fm-topbar {
   background-color: var(--panel-bg);
-  border-bottom: 2px solid var(--border-color);
-  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .fm-club-info {
@@ -74,7 +67,9 @@ body.emergency-mode {
 }
 
 .fm-flag {
-  font-size: 2rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff;
   line-height: 1;
 }
 
@@ -82,7 +77,8 @@ body.emergency-mode {
   font-weight: 800;
   font-size: 1.1rem;
   letter-spacing: 0.5px;
-  color: #fff;
+  color: #ffffff;
+  text-transform: uppercase;
 }
 
 .fm-manager-title {
@@ -90,72 +86,73 @@ body.emergency-mode {
   color: var(--text-muted);
 }
 
+/* --- Top Stat Boxes --- */
 .fm-top-stats {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .fm-stat-box {
   background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 6px;
-  padding: 0.4rem 0.75rem;
+  padding: 0.4rem 0.8rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 90px;
-}
-
-.fm-stat-box.highlight {
-  border-color: var(--danger-color);
-  background: rgba(239, 68, 68, 0.08);
-}
-
-.fm-stat-box.highlight-food {
-  border-color: var(--success-color);
-  background: rgba(16, 185, 129, 0.08);
-}
-
-.fm-stat-box.highlight-pop {
-  border-color: var(--primary-color);
-  background: rgba(37, 99, 235, 0.08);
-}
-
-.fm-stat-box.highlight-tech {
-  border-color: var(--accent-gold);
-  background: rgba(245, 158, 11, 0.08);
+  min-width: 95px;
+  text-align: center;
 }
 
 .fm-stat-box .label {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-muted);
   letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .fm-stat-box .value {
-  font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
 }
 
-/* --- Main App Body --- */
+/* Warna spesifik stat baris atas */
+.stat-pop .value { color: #3b82f6; }
+.stat-kas .value { color: #10b981; }
+.stat-food .value { color: #10b981; }
+.stat-oil .value { color: #f59e0b; }
+.stat-coal .value { color: #38bdf8; }
+.stat-uranium .value { color: #ef4444; }
+
+.stat-coup {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.stat-coup .label { color: #ef4444; }
+.stat-coup .value { color: #ef4444; }
+
+.stat-date .value {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* --- Main Body Layout --- */
 .fm-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* --- Sidebar Navigation --- */
+/* --- Sidebar --- */
 .fm-sidebar {
-  width: 240px;
+  width: 230px;
   background-color: var(--panel-bg);
   border-right: 1px solid var(--border-color);
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
   overflow-y: auto;
 }
 
@@ -163,15 +160,16 @@ body.emergency-mode {
   font-size: 0.65rem;
   font-weight: 800;
   color: var(--text-muted);
-  padding: 0.75rem 1.25rem 0.25rem;
+  padding: 1rem 1.25rem 0.35rem;
   letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .fm-nav-btn {
   background: none;
   border: none;
   color: var(--text-main);
-  padding: 0.6rem 1.25rem;
+  padding: 0.65rem 1.25rem;
   text-align: left;
   font-family: var(--font-sans);
   font-size: 0.85rem;
@@ -179,27 +177,25 @@ body.emergency-mode {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
+  gap: 0.6rem;
+  transition: all 0.15s ease;
 }
 
 .fm-nav-btn:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background-color: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
 }
 
 .fm-nav-btn.active {
-  background-color: var(--card-bg);
+  background-color: rgba(255, 255, 255, 0.06);
   color: var(--accent-gold);
-  border-left-color: var(--accent-gold);
 }
 
-/* --- Main Content Area --- */
+/* --- Content Area --- */
 .fm-content {
   flex: 1;
   background-color: var(--bg-dark);
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
 }
 
@@ -211,141 +207,101 @@ body.emergency-mode {
   display: block;
 }
 
-.fm-panel-header {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #fff;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.25rem;
-  letter-spacing: 0.5px;
-}
-
-/* --- Cards & Grid Layout --- */
+/* --- Grid 2 Kolom untuk Kartu Dashboard --- */
 .fm-grid-2 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
 }
 
-.fm-grid-3 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
+/* --- Card Styles (Sesuai Gambar) --- */
 .fm-card {
-  background-color: var(--panel-bg);
-  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   padding: 1.25rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-  transition: border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.fm-card.tech-unlocked {
-  border-color: var(--success-color);
-  background: linear-gradient(180deg, var(--panel-bg) 0%, rgba(16, 185, 129, 0.05) 100%);
+.fm-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
 }
 
-.card-title {
-  font-size: 0.85rem;
-  font-weight: 800;
+.fm-card-desc {
+  font-size: 0.825rem;
   color: var(--text-muted);
-  letter-spacing: 0.5px;
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
 }
 
-.stat-row {
+.fm-card-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.35rem 0;
   font-size: 0.85rem;
+  margin-bottom: 0.5rem;
 }
 
-/* --- Badges --- */
-.badge {
-  font-size: 0.7rem;
+.fm-card-info .info-label {
+  color: var(--text-main);
+}
+
+.fm-card-info .info-value {
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  text-transform: uppercase;
 }
 
-.badge.bg-green {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: var(--success-color);
-  border: 1px solid var(--success-color);
-}
-
-.badge.bg-warning {
-  background-color: rgba(245, 158, 11, 0.2);
-  color: var(--warning-color);
-  border: 1px solid var(--warning-color);
-}
-
-/* --- Progress Bars --- */
-.bar-bg {
-  background-color: var(--card-bg);
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 0.25rem;
-  border: 1px solid var(--border-color);
-}
-
-.bar-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.bg-blue { background-color: var(--primary-color); }
-.bg-green { background-color: var(--success-color); }
-.bg-red { background-color: var(--danger-color); }
-.bg-warning { background-color: var(--warning-color); }
-
-/* --- Tables --- */
-.fm-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-}
-
-.fm-table th, .fm-table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.fm-table th {
-  background-color: var(--card-bg);
-  color: var(--text-muted);
-  font-weight: 700;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-}
-
-.fm-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.02);
-}
+.fm-card-info .info-value.blue { color: #60a5fa; }
+.fm-card-info .info-value.green { color: #10b981; }
+.fm-card-info .info-value.orange { color: #f59e0b; }
 
 /* --- Buttons --- */
 .btn {
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 0.8rem;
-  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  padding: 0.65rem 1rem;
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-blue-hover);
+}
+
+.btn-secondary {
+  background-color: #1a2332;
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #222d3d;
+}
+
+.btn-block {
+  width: 100%;
+  display: block;
+  margin-top: 0.5rem;
 }
 
 .btn:disabled {
@@ -353,135 +309,79 @@ body.emergency-mode {
   cursor: not-allowed;
 }
 
-.btn-primary {
-  background-color: var(--primary-color);
-  color: #fff;
-}
-.btn-primary:hover:not(:disabled) { background-color: var(--primary-hover); }
-
-.btn-secondary {
-  background-color: var(--card-bg);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-}
-.btn-secondary:hover:not(:disabled) { background-color: var(--border-color); }
-
-.btn-danger {
-  background-color: var(--danger-color);
-  color: #fff;
-}
-.btn-danger:hover:not(:disabled) { background-color: #dc2626; }
-
-.btn-warning {
-  background-color: var(--warning-color);
-  color: #000;
-}
-.btn-warning:hover:not(:disabled) { background-color: #d97706; }
-
-.btn-block {
-  display: block;
-  width: 100%;
+/* --- Badges & Utility --- */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
 }
 
-/* --- Utilities Text --- */
-.text-success { color: var(--success-color); }
-.text-danger { color: var(--danger-color); }
-.text-warning { color: var(--warning-color); }
-.text-primary { color: #60a5fa; }
-.text-muted { color: var(--text-muted); }
-.text-center { text-align: center; }
+.badge.bg-green {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--stat-green);
+}
 
-.mt-2 { margin-top: 0.75rem; }
-.mb-2 { margin-bottom: 0.75rem; }
+.badge.bg-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--stat-orange);
+}
 
-/* --- Modals --- */
+.text-success { color: var(--stat-green); }
+.text-danger { color: var(--stat-red); }
+.text-warning { color: var(--stat-orange); }
+
+/* --- Modals & Toasts --- */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
 }
 
-.modal.hidden {
-  display: none;
-}
+.modal.hidden { display: none; }
 
 .modal-content {
   background-color: var(--panel-bg);
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.75rem;
-  max-width: 480px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 450px;
   width: 90%;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
 }
 
-.modal-header {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--accent-gold);
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
-}
-
-/* --- Toast Container --- */
 .toast-container {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  bottom: 1.25rem;
+  right: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   z-index: 10000;
-  pointer-events: none;
 }
 
 .toast {
-  background-color: var(--panel-bg);
+  background-color: var(--card-bg);
   border-left: 4px solid var(--accent-gold);
-  border-top: 1px solid var(--border-color);
-  border-right: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
+  border-top: 1px solid var(--card-border);
+  border-right: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
   color: var(--text-main);
   padding: 0.75rem 1rem;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-  animation: slide-in 0.3s ease-out forwards;
 }
 
-@keyframes slide-in {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-/* --- Responsive Adjustments --- */
-@media (max-width: 900px) {
-  .fm-body {
-    flex-direction: column;
-  }
-  .fm-sidebar {
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 0.5rem;
-  }
-  .sidebar-category { display: none; }
-  .fm-nav-btn {
-    white-space: nowrap;
-    border-left: none;
-    border-bottom: 3px solid transparent;
-  }
-  .fm-nav-btn.active {
-    border-bottom-color: var(--accent-gold);
+/* Responsif untuk layar kecil */
+@media (max-width: 1024px) {
+  .fm-grid-2 {
+    grid-template-columns: 1fr;
   }
 }
