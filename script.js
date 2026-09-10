@@ -10,6 +10,20 @@ const ROAD_TIERS = [
   { name: "Jalan Tol Strategis (Lvl 2)", bonus: 0.50, cost: 0 }
 ];
 
+// 10 TEKNOLOGI BERDASARKAN JAMAN
+const TECH_TREE = [
+  { id: "tech_agri", name: "Pertanian Mekanis", cost: 100, yearReq: 1960, req: null, desc: "Meningkatkan hasil produksi pangan sebesar +50%.", unlocked: false },
+  { id: "tech_oil", name: "Pengeboran Lepas Pantai", cost: 150, yearReq: 1962, req: "tech_agri", desc: "Meningkatkan hasil minyak bumi +30%.", unlocked: false },
+  { id: "tech_med", name: "Layanan Kesehatan Modern", cost: 200, yearReq: 1965, req: "tech_oil", desc: "Menurunkan angka kematian populasi bulanan.", unlocked: false },
+  { id: "tech_port", name: "Dermaga Kontainer Logistik", cost: 300, yearReq: 1968, req: "tech_med", desc: "Meningkatkan pendapatan ekspor dari Pelabuhan +40%.", unlocked: false },
+  { id: "tech_edu", name: "Kurikulum Sains & Teknik", cost: 450, yearReq: 1970, req: "tech_port", desc: "Meningkatkan generasi Tech Point dari Universitas +50%.", unlocked: false },
+  { id: "tech_power", name: "Jaringan Listrik Nasional", cost: 600, yearReq: 1973, req: "tech_edu", desc: "Meningkatkan produksi tambang & bank +25%.", unlocked: false },
+  { id: "tech_comm", name: "Sistem Telekomunikasi RRI/TV", cost: 800, yearReq: 1976, req: "tech_power", desc: "Meningkatkan efektivitas Cult of Personality.", unlocked: false },
+  { id: "tech_arms", name: "Industri Pertahanan Mandiri", cost: 1000, yearReq: 1980, req: "tech_comm", desc: "Menjaga loyalitas militer tetap stabil.", unlocked: false },
+  { id: "tech_nuke_know", name: "Fisika Reaktor Nuklir", cost: 1500, yearReq: 1985, req: "tech_arms", desc: "Membuka efisiensi riset dan pemrosesan Uranium.", unlocked: false },
+  { id: "tech_digital", name: "Otomasi & Era Digital", cost: 2500, yearReq: 1990, req: "tech_nuke_know", desc: "Bonus deviden bank & pajak nasional +50%.", unlocked: false }
+];
+
 const INITIAL_STATE = {
   day: 1,
   monthIndex: 0,
@@ -17,17 +31,18 @@ const INITIAL_STATE = {
   
   // --- Demografi & Populasi Engine ---
   populationTotal: 4620000,
-  popPolicy: "natural", // natural, encourage, restrict
+  popPolicy: "natural", 
   monthlyBirths: 0,
   monthlyDeaths: 0,
   monthlyNetGrowth: 0,
 
   // --- Resource Engine ---
-  treasury: 100000000,    // Dollar ($)
-  oilStock: 1000,         // Minyak Mentah (Barel)
-  coalStock: 500,         // Batubara (Ton)
-  uraniumStock: 0,        // Uranium (Ton)
-  foodStock: 2000,        // Resources Makanan (Ton)
+  treasury: 100000000,    
+  oilStock: 1000,         
+  coalStock: 500,         
+  uraniumStock: 0,        
+  foodStock: 2000,        
+  techPoints: 0,          // NEW: Tech Points
 
   oilLevel: 1,
   roadLevel: 0,           
@@ -49,15 +64,19 @@ const INITIAL_STATE = {
 
   // --- Bangunan & Infrastruktur ---
   buildings: {
-    farms: 1,             // Minimal 1 Farm awal untuk suplai makanan
+    farms: 1,             
     banks: 0,
     schools: 0,
+    universities: 0,      // NEW: Universitas
+    ports: 0,             // NEW: Pelabuhan
     coalMines: 0,
     garrisons: 0
   },
 
+  unlockedTechs: [],       // Array simpan ID teknologi yang sudah di-unlock
+
   // --- Anggaran & Kebijakan Subsidi ---
-  subsidyRate: 10000000, // Subsidi Rakyat per detik ($10M)
+  subsidyRate: 10000000, 
 
   blackMarketActive: false,
   ministers: {
@@ -93,32 +112,29 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-// --- Dynamic Population Calculation ---
 function processMonthlyPopulation() {
   const pop = game.populationTotal;
-  
-  // Laju kelahiran dasar (misal ~1.2% per bulan)
   let birthRate = 0.0025; 
   let deathRate = 0.0015;
 
-  // Modifikasi Kebijakan Populasi
+  if (game.unlockedTechs.includes("tech_med")) {
+    deathRate -= 0.0004; // Medis modern menurunkan angka kematian
+  }
+
   if (game.popPolicy === "encourage") birthRate += 0.0015; 
   if (game.popPolicy === "restrict") {
     birthRate -= 0.0008;
-    deathRate -= 0.0002; // Emigrasi tertahan
+    deathRate -= 0.0002;
   }
 
-  // Modifikasi Pajak & Kepuasan (Pajak tinggi = emigrasi naik)
   if (game.taxRateSetting === "low") birthRate += 0.0005;
-  if (game.taxRateSetting === "high") deathRate += 0.0008; // Emigrasi karena pajak
-  if (game.taxRateSetting === "extreme") deathRate += 0.0025; // Keluar negeri massal
+  if (game.taxRateSetting === "high") deathRate += 0.0008;
+  if (game.taxRateSetting === "extreme") deathRate += 0.0025;
 
-  // Dampak Makanan (Kelaparan meningkatkan kematian secara drastis)
   if (game.foodStock <= 0) {
-    deathRate += 0.0050; // Kematian tinggi akibat krisis pangan
+    deathRate += 0.0050;
   }
 
-  // Dampak Kerusuhan / Kudeta
   if (game.coupThreat > 50) {
     deathRate += 0.0010;
   }
@@ -136,13 +152,11 @@ function gameLoop() {
   const elapsed = (now - game.lastUpdate) / 1000;
   game.lastUpdate = now;
 
-  // Kalender (1 detik = 3 hari)
+  // Kalender
   game.day += elapsed * 3;
   if (game.day >= 30) {
     game.day = 1;
     game.monthIndex++;
-    
-    // Eksekusi siklus dinamika kependudukan per bulan
     processMonthlyPopulation();
 
     if (game.monthIndex >= 12) {
@@ -151,52 +165,51 @@ function gameLoop() {
     }
   }
 
-  // 1. Logistik & Bonus Jalan
+  // Generasi Tech Points dari Sekolah & Universitas (Mahal & Lambat)
+  let eduTechMultiplier = game.unlockedTechs.includes("tech_edu") ? 1.5 : 1.0;
+  let schoolTP = game.buildings.schools * 0.05 * elapsed; 
+  let uniTP = game.buildings.universities * 0.25 * eduTechMultiplier * elapsed; 
+  game.techPoints += (schoolTP + uniTP);
+
   const roadBonus = ROAD_TIERS[game.roadLevel].bonus;
 
-  // 2. Produksi Komoditas & Resources Makanan
-  const oilProducedPerSec = (game.oilLevel * 100) * (1 + roadBonus);
+  // Produksi Makanan & Komoditas
+  let farmBonus = game.unlockedTechs.includes("tech_agri") ? 1.5 : 1.0;
+  let oilBonus = game.unlockedTechs.includes("tech_oil") ? 1.3 : 1.0;
+  
+  const oilProducedPerSec = (game.oilLevel * 100) * (1 + roadBonus) * oilBonus;
   game.oilStock += oilProducedPerSec * elapsed;
 
+  let mineBonus = game.unlockedTechs.includes("tech_power") ? 1.25 : 1.0;
   if (game.buildings.coalMines > 0) {
-    game.coalStock += (game.buildings.coalMines * 10) * elapsed;
+    game.coalStock += (game.buildings.coalMines * 10 * mineBonus) * elapsed;
   }
 
-  // Produksi & Konsumsi Makanan (Berpengaruh dari Jumlah Populasi)
-  const foodProduction = (game.buildings.farms * 150) * elapsed; 
-  const foodConsumption = (game.populationTotal / 50000) * elapsed; // Konsumsi bertambah seiring populasi
+  const foodProduction = (game.buildings.farms * 150 * farmBonus) * elapsed; 
+  const foodConsumption = (game.populationTotal / 50000) * elapsed; 
   game.foodStock = Math.max(0, game.foodStock + foodProduction - foodConsumption);
 
-  // Penalti Krisis Pangan
-  let foodImpact = 0;
-  if (game.foodStock <= 0) {
-    foodImpact = -1.5;
-  }
+  let foodImpact = game.foodStock <= 0 ? -1.5 : 0;
 
-  // 3. MEKANIK VICTORIA: REVENUE (PENDAPATAN)
-  // Base Tax dihitung dari rasio populasi
+  // Revenue (Pajak, Bank, Pelabuhan)
+  let digitalBonus = game.unlockedTechs.includes("tech_digital") ? 1.5 : 1.0;
   let baseTax = (game.populationTotal / 4620000) * 2000000;
   let taxMultiplier = 1;
   let taxPublicImpact = 0;
 
-  if (game.taxRateSetting === "low") {
-    taxMultiplier = 0.5;
-    taxPublicImpact = 0.2;
-  } else if (game.taxRateSetting === "medium") {
-    taxMultiplier = 1.0;
-    taxPublicImpact = 0;
-  } else if (game.taxRateSetting === "high") {
-    taxMultiplier = 2.0;
-    taxPublicImpact = -0.3;
-  } else if (game.taxRateSetting === "extreme") {
-    taxMultiplier = 3.8;
-    taxPublicImpact = -0.8;
-  }
+  if (game.taxRateSetting === "low") { taxMultiplier = 0.5; taxPublicImpact = 0.2; }
+  else if (game.taxRateSetting === "medium") { taxMultiplier = 1.0; taxPublicImpact = 0; }
+  else if (game.taxRateSetting === "high") { taxMultiplier = 2.0; taxPublicImpact = -0.3; }
+  else if (game.taxRateSetting === "extreme") { taxMultiplier = 3.8; taxPublicImpact = -0.8; }
 
-  const bankDeviden = game.buildings.banks * 2500000;
-  const monthlyTaxRevenue = (baseTax * taxMultiplier) * (1 + roadBonus);
+  const bankDeviden = (game.buildings.banks * 2500000) * digitalBonus * mineBonus;
+  
+  // Bonus Devisa dari Pelabuhan
+  let portBonus = game.unlockedTechs.includes("tech_port") ? 1.4 : 1.0;
+  const portRevenue = (game.buildings.ports * 3500000) * portBonus;
 
-  // Ekspor Minyak Mentah (Dianggap Devisa Revenue)
+  const monthlyTaxRevenue = (baseTax * taxMultiplier * digitalBonus) * (1 + roadBonus);
+
   let autoExportIncome = 0;
   if (game.exportActive && game.oilStock > 0) {
     let exportRate = Math.min(game.oilStock, 80 * elapsed);
@@ -208,27 +221,29 @@ function gameLoop() {
     }
   }
 
-  const totalRevenuePerSec = monthlyTaxRevenue + bankDeviden + autoExportIncome;
+  const totalRevenuePerSec = monthlyTaxRevenue + bankDeviden + portRevenue + autoExportIncome;
 
-  // 4. MEKANIK VICTORIA: STRUCTURAL EXPENSES (PENGELUARAN)
+  // Operational Expenses
   let expSubsidy = game.subsidyRate;
-  if (game.popPolicy === "encourage") expSubsidy += 5000000; // Extra biaya insentif kelahiran
+  if (game.popPolicy === "encourage") expSubsidy += 5000000;
 
-  const expSekolah = (game.buildings.schools * 3000000) + (game.buildings.garrisons * 5000000);
-  const expMakananLogistik = (game.buildings.farms * 2000000); 
+  const expSekolah = (game.buildings.schools * 3000000) + (game.buildings.universities * 8000000) + (game.buildings.garrisons * 5000000);
+  const expMakananLogistik = (game.buildings.farms * 2000000) + (game.buildings.ports * 1500000); 
   
   const totalExpensesPerSec = expSubsidy + expSekolah + expMakananLogistik;
 
-  // 5. NERACA NET BALANCE
   const netBalancePerSec = totalRevenuePerSec - totalExpensesPerSec;
   game.treasury += netBalancePerSec * elapsed;
 
-  // 6. Efek Bangunan & Kepuasan Rakyat
+  // Stabilitas & Loyalitas
+  let cultBonus = game.unlockedTechs.includes("tech_comm") ? 0.3 : 0.15;
   game.loyaltyPeople = Math.min(100, Math.max(0, game.loyaltyPeople + (taxPublicImpact * elapsed) + (game.buildings.farms * 0.2 * elapsed) + (foodImpact * elapsed)));
-  game.cultOfPersonality = Math.min(100, Math.max(0, game.cultOfPersonality + (game.buildings.schools * 0.15 * elapsed)));
-  game.loyaltyMilitary = Math.min(100, Math.max(0, game.loyaltyMilitary + (game.buildings.garrisons * 0.3 * elapsed)));
+  game.cultOfPersonality = Math.min(100, Math.max(0, game.cultOfPersonality + (game.buildings.schools * cultBonus * elapsed)));
+  
+  let milBonusTech = game.unlockedTechs.includes("tech_arms") ? 0.1 : 0;
+  game.loyaltyMilitary = Math.min(100, Math.max(0, game.loyaltyMilitary + ((game.buildings.garrisons * 0.3 + milBonusTech) * elapsed)));
 
-  // 7. Resiko Kudeta
+  // Kudeta
   let threatGain = 0;
   if (game.loyaltyMilitary < 40) threatGain += 2.0;
   if (game.loyaltyPeople < 30) threatGain += 3.0;
@@ -241,26 +256,26 @@ function gameLoop() {
 
   game.coupThreat += threatGain * elapsed;
 
-  if (game.coupThreat >= 75) {
-    document.body.classList.add("emergency-mode");
-  } else {
-    document.body.classList.remove("emergency-mode");
-  }
+  if (game.coupThreat >= 75) document.body.classList.add("emergency-mode");
+  else document.body.classList.remove("emergency-mode");
 
-  // Dynamic Event Trigger
+  // DYNAMIC EVENT TRIGGER (Hanya Pemicu Insiden Keamanan Sosial Jika Kepuasan Rakyat Rendah < 40)
   if (now - game.lastEventCheck > 20000 && !game.activeEvent) {
     game.lastEventCheck = now;
-    if (Math.random() < 0.6) triggerRandomEvent();
+    if (game.loyaltyPeople < 40 && Math.random() < 0.7) {
+      triggerRandomEvent();
+    }
   }
 
   if (game.coupThreat >= 100) {
-    triggerGameOver("REVOLUSI TOTAL! Militer dan kelompok oposisi merebut Istana.");
+    triggerGameOver("REVOLUSI TOTAL! Militer dan rakyat merebut Istana.");
     return;
   }
 
   updateUI(
     monthlyTaxRevenue, 
     bankDeviden, 
+    portRevenue,
     autoExportIncome, 
     totalRevenuePerSec, 
     expSubsidy, 
@@ -275,28 +290,30 @@ function gameLoop() {
 // --- Dynamic Events ---
 const EVENTS = [
   {
-    title: "⚠️ PEMBERONTAKAN MILISI AL-QATALA!",
-    desc: "Kelompok milisi mengepung kawasan kilang minyak Al-Zubair.",
-    b1: "Kirim Pasukan Khusus ($20M)",
-    b2: "Bayar Tebusan ($50M)",
-    b3: "Abaikan Dulu",
+    title: "⚠️ KERUSUHAN & INSIDEN KEAMANAN SOSIAL!",
+    desc: "Kepuasan rakyat jatuh melorot! Gelombang demonstran dan milisi membakar fasilitas kilang.",
+    b1: "Tumpas dengan Pasukan Khusus ($20M)",
+    b2: "Bagi-Bagi Bantuan Sosial Darurat ($50M)",
+    b3: "Biarkan Demonstran Beraksi",
     r1: () => {
       if (game.treasury >= 20000000) {
         game.treasury -= 20000000;
         game.loyaltyMilitary = Math.min(100, game.loyaltyMilitary + 5);
-        showToast("⚔️ Milisi ditumpas!");
+        game.loyaltyPeople = Math.max(0, game.loyaltyPeople - 10);
+        showToast("⚔️ Demonstrasi ditumpas dengan kekerasan!");
       } else { showToast("❌ Dana tidak cukup!"); game.coupThreat += 15; }
     },
     r2: () => {
       if (game.treasury >= 50000000) {
         game.treasury -= 50000000;
-        showToast("💰 Tebusan terbayar.");
+        game.loyaltyPeople = Math.min(100, game.loyaltyPeople + 15);
+        showToast("💰 Kerusuhan mereda setelah pembagian bansos.");
       } else { showToast("❌ Dana tidak cukup!"); game.coupThreat += 15; }
     },
     r3: () => {
       game.coupThreat += 20;
       game.oilStock = Math.max(0, game.oilStock - 500);
-      showToast("💥 Tangki minyak meledak!");
+      showToast("💥 Tangki minyak meledak dibakar massa!");
     }
   }
 ];
@@ -319,6 +336,76 @@ function resolveEvent(opt) {
   if (opt === 3) game.activeEvent.r3();
   game.activeEvent = null;
   document.getElementById("event-modal").classList.add("hidden");
+}
+
+function unlockTechnology(techId) {
+  const tech = TECH_TREE.find(t => t.id === techId);
+  if (!tech) return;
+
+  if (game.unlockedTechs.includes(techId)) {
+    showToast("⚠️ Teknologi ini sudah diteliti!");
+    return;
+  }
+
+  if (game.year < tech.yearReq) {
+    showToast(`❌ Belum mencapai tahun ${tech.yearReq}!`);
+    return;
+  }
+
+  if (tech.req && !game.unlockedTechs.includes(tech.req)) {
+    const parentTech = TECH_TREE.find(t => t.id === tech.req);
+    showToast(`❌ Harus meneliti ${parentTech.name} terlebih dahulu!`);
+    return;
+  }
+
+  if (game.techPoints < tech.cost) {
+    showToast(`❌ Tech Points tidak cukup! Butuh ${tech.cost} TP.`);
+    return;
+  }
+
+  game.techPoints -= tech.cost;
+  game.unlockedTechs.push(techId);
+  showToast(`💡 Teknologi Berhasil Dibuka: ${tech.name}!`);
+  renderTechTreeUI();
+}
+
+function renderTechTreeUI() {
+  const container = document.getElementById("tech-tree-list");
+  if (!container) return;
+  container.innerHTML = "";
+
+  TECH_TREE.forEach(tech => {
+    const isUnlocked = game.unlockedTechs.includes(tech.id);
+    const parentTech = tech.req ? TECH_TREE.find(t => t.id === tech.req) : null;
+    const parentUnlocked = !tech.req || game.unlockedTechs.includes(tech.req);
+    const yearReached = game.year >= tech.yearReq;
+
+    const card = document.createElement("div");
+    card.className = `fm-card ${isUnlocked ? 'tech-unlocked' : ''}`;
+    
+    let reqText = tech.req ? `Syarat: ${parentTech.name}` : "Syarat: -";
+    let statusBadge = isUnlocked ? `<span class="badge bg-green">Selesai</span>` : `<span class="badge bg-warning">${tech.cost} TP</span>`;
+
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h4>${tech.name}</h4>
+        ${statusBadge}
+      </div>
+      <p class="text-muted mt-2">${tech.desc}</p>
+      <div class="stat-row mt-2" style="font-size: 0.75rem;">
+        <span>Tahun Min: <strong class="${yearReached ? 'text-success' : 'text-danger'}">${tech.yearReq}</strong></span>
+        <span>${reqText}</span>
+      </div>
+      ${!isUnlocked ? `
+        <button class="btn ${yearReached && parentUnlocked && game.techPoints >= tech.cost ? 'btn-primary' : 'btn-secondary'} btn-block mt-2" 
+          onclick="unlockTechnology('${tech.id}')" ${!yearReached || !parentUnlocked ? 'disabled' : ''}>
+          Riset (${tech.cost} TP)
+        </button>
+      ` : '<button class="btn btn-secondary btn-block mt-2" disabled>Sudah Ditentukan</button>'}
+    `;
+
+    container.appendChild(card);
+  });
 }
 
 function setTaxRate(rate) {
@@ -347,10 +434,11 @@ function initEventListeners() {
       e.target.classList.add("active");
       const tabId = e.target.getAttribute("data-tab");
       document.getElementById(`tab-${tabId}`).classList.add("active");
+
+      if (tabId === "techtree") renderTechTreeUI();
     });
   });
 
-  // Upgrade Kilang
   document.getElementById("btn-upgrade-oil").onclick = () => {
     if (game.treasury >= 50000000) {
       game.treasury -= 50000000;
@@ -359,7 +447,6 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Upgrade Jalan
   document.getElementById("btn-upgrade-road").onclick = () => {
     if (game.roadLevel < 2) {
       const cost = ROAD_TIERS[game.roadLevel].cost;
@@ -371,7 +458,6 @@ function initEventListeners() {
     } else showToast("⚠️ Jalan sudah mencapai tingkat Jalan Tol maksimum!");
   };
 
-  // Bangun Farm
   document.getElementById("btn-build-farm").onclick = () => {
     if (game.treasury >= 40000000) {
       game.treasury -= 40000000;
@@ -380,7 +466,6 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Beli Impor Makanan Darurat
   document.getElementById("btn-buy-food").onclick = () => {
     if (game.treasury >= 20000000) {
       game.treasury -= 20000000;
@@ -389,7 +474,6 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Bangun Bank
   document.getElementById("btn-build-bank").onclick = () => {
     if (game.treasury >= 120000000) {
       game.treasury -= 120000000;
@@ -398,16 +482,32 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Bangun Sekolah
   document.getElementById("btn-build-school").onclick = () => {
     if (game.treasury >= 60000000) {
       game.treasury -= 60000000;
       game.buildings.schools++;
-      showToast("🏫 Sekolah doktrin dibuka!");
+      showToast("🏫 Sekolah didirikan! TP mulai dihasilkan secara perlahan.");
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Tambang Batubara
+  // BANGUNAN BARU: UNIVERSITAS
+  document.getElementById("btn-build-uni").onclick = () => {
+    if (game.treasury >= 200000000) {
+      game.treasury -= 200000000;
+      game.buildings.universities++;
+      showToast("🎓 Universitas Riset didirikan! Generasi TP meningkat pesat.");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // BANGUNAN BARU: PELABUHAN
+  document.getElementById("btn-build-port").onclick = () => {
+    if (game.treasury >= 180000000) {
+      game.treasury -= 180000000;
+      game.buildings.ports++;
+      showToast("⚓ Pelabuhan Internasional beroperasi! Pendapatan devisa bertambah.");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
   document.getElementById("btn-build-coalmine").onclick = () => {
     if (game.treasury >= 70000000) {
       game.treasury -= 70000000;
@@ -416,7 +516,6 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Pangkalan Militer
   document.getElementById("btn-build-garrison").onclick = () => {
     if (game.treasury >= 250000000) {
       game.treasury -= 250000000;
@@ -425,13 +524,11 @@ function initEventListeners() {
     } else showToast("❌ Dana tidak cukup!");
   };
 
-  // Toggle Ekspor
   document.getElementById("btn-toggle-export").onclick = () => {
     game.exportActive = !game.exportActive;
     showToast(game.exportActive ? "🚢 Auto-Ekspor Minyak Diberlakukan" : "🛑 Auto-Ekspor Dihentikan");
   };
 
-  // Manual Ekspor Minyak
   document.getElementById("btn-manual-export").onclick = () => {
     if (game.oilStock > 0) {
       const revenue = (game.oilStock * game.oilPricePerBarrel) * 1000;
@@ -441,7 +538,6 @@ function initEventListeners() {
     } else showToast("❌ Stok minyak kosong!");
   };
 
-  // Ekspor Batubara
   document.getElementById("btn-export-coal").onclick = () => {
     if (game.coalStock >= 500) {
       game.coalStock -= 500;
@@ -450,7 +546,6 @@ function initEventListeners() {
     } else showToast("❌ Stok batubara tidak cukup!");
   };
 
-  // Tambang Uranium
   document.getElementById("btn-mine-uranium").onclick = () => {
     if (game.treasury >= 80000000) {
       game.treasury -= 80000000;
@@ -460,13 +555,14 @@ function initEventListeners() {
   };
 
   document.getElementById("btn-develop-nuke").onclick = () => {
-    if (game.treasury >= 100000000 && game.uraniumStock >= 50) {
+    let reqUranium = game.unlockedTechs.includes("tech_nuke_know") ? 35 : 50;
+    if (game.treasury >= 100000000 && game.uraniumStock >= reqUranium) {
       game.treasury -= 100000000;
-      game.uraniumStock -= 50;
+      game.uraniumStock -= reqUranium;
       game.nukeProgress += 25;
       game.unSanctions = Math.min(100, game.unSanctions + 25);
       showToast("☢️ Riset uji coba nuklir berhasil!");
-    } else showToast("❌ Butuh $100M dan 50 Ton Uranium!");
+    } else showToast(`❌ Butuh $100M dan ${reqUranium} Ton Uranium!`);
   };
 
   document.getElementById("btn-statue").onclick = () => {
@@ -568,13 +664,15 @@ function triggerGameOver(reason) {
 function resetGame() {
   game = JSON.parse(JSON.stringify(INITIAL_STATE));
   document.getElementById("gameover-modal").classList.add("hidden");
+  renderTechTreeUI();
 }
 
 // Sync UI Realtime
-function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totExp=0, netBal=0, oilRate=0) {
+function updateUI(pajakRev=0, bankRev=0, portRev=0, minyakRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totExp=0, netBal=0, oilRate=0) {
   document.getElementById("top-date").innerText = `${Math.floor(game.day)} ${MONTHS[game.monthIndex]} ${game.year}`;
   document.getElementById("top-population").innerText = formatPop(game.populationTotal);
   document.getElementById("top-treasury").innerText = formatMoney(game.treasury);
+  document.getElementById("top-techpoints").innerText = `${Math.floor(game.techPoints)} TP`;
   document.getElementById("top-food").innerText = `${Math.floor(game.foodStock).toLocaleString()} Ton`;
   document.getElementById("top-oil").innerText = `${Math.floor(game.oilStock).toLocaleString()} Bbl`;
   document.getElementById("top-coal").innerText = `${Math.floor(game.coalStock).toLocaleString()} Ton`;
@@ -590,7 +688,7 @@ function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek
   document.getElementById("val-cult").innerText = `${Math.floor(game.cultOfPersonality)}%`;
   document.getElementById("bar-cult").style.width = `${game.cultOfPersonality}%`;
 
-  // Status Populasi Panel Pops
+  // Status Pops
   document.getElementById("pop-total-val").innerText = `${Math.floor(game.populationTotal).toLocaleString()} Jiwa`;
   
   const netGrowthEl = document.getElementById("pop-net-growth");
@@ -605,7 +703,6 @@ function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek
   if (game.popPolicy === "restrict") polLabel = "Pembatasan Ketat";
   document.getElementById("pop-policy-label").innerText = polLabel;
 
-  // Distribusi Faksi Populasi
   document.getElementById("pop-mil-count").innerText = formatPop(game.populationTotal * 0.025);
   document.getElementById("pop-peo-count").innerText = formatPop(game.populationTotal * 0.735);
   document.getElementById("pop-rel-count").innerText = formatPop(game.populationTotal * 0.24);
@@ -613,7 +710,6 @@ function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek
   document.getElementById("pop-mil-sat").innerText = `${Math.floor(game.loyaltyMilitary)}%`;
   document.getElementById("pop-peo-sat").innerText = `${Math.floor(game.loyaltyPeople)}%`;
 
-  // Status Kilang & Jalan
   document.getElementById("oil-lvl-txt").innerText = `Level ${game.oilLevel}`;
   document.getElementById("oil-rate-txt").innerText = `+${Math.floor(oilRate)} Bbl / dtk`;
   document.getElementById("export-status-txt").innerText = game.exportActive ? (game.unSanctions >= 100 ? "Terembargo" : "Aktif") : "Diberhentikan";
@@ -622,17 +718,21 @@ function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek
   document.getElementById("road-level-txt").innerText = roadInfo.name;
   document.getElementById("road-bonus-txt").innerText = `+${Math.floor(roadInfo.bonus * 100)}%`;
 
-  // Updates Bangunan
+  // Bangunan
   document.getElementById("bld-farm-lvl").innerText = game.buildings.farms;
   document.getElementById("bld-bank-lvl").innerText = game.buildings.banks;
   document.getElementById("bld-school-lvl").innerText = game.buildings.schools;
+  document.getElementById("bld-uni-lvl").innerText = game.buildings.universities;
+  document.getElementById("bld-port-lvl").innerText = game.buildings.ports;
   document.getElementById("bld-coalmine-lvl").innerText = game.buildings.coalMines;
   document.getElementById("bld-garrison-lvl").innerText = game.buildings.garrisons;
+
   document.getElementById("bank-income-txt").innerText = `+$${((game.buildings.banks * 2.5)).toFixed(1)}M / dtk`;
 
-  // Updates Finansial Victoria Engine
+  // Finansial Victoria Engine
   document.getElementById("vic-rev-pajak").innerText = formatMoney(pajakRev) + " / dtk";
   document.getElementById("vic-rev-bank").innerText = formatMoney(bankRev) + " / dtk";
+  document.getElementById("vic-rev-port").innerText = formatMoney(portRev) + " / dtk";
   document.getElementById("vic-rev-minyak").innerText = formatMoney(minyakRev) + " / dtk";
   document.getElementById("vic-rev-total").innerText = formatMoney(totRev) + " / dtk";
 
@@ -675,5 +775,6 @@ function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek
 
 window.onload = () => {
   initEventListeners();
+  renderTechTreeUI();
   setInterval(gameLoop, 1000);
 };
