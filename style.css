@@ -1,29 +1,34 @@
 /* ===================================================
-   URZIKSTAN STATE MANAGER — ORIGINAL DASHBOARD THEME
+   URZIKSTAN STATE MANAGER — FOOTBALL MANAGER THEME (ENHANCED UI/UX)
    =================================================== */
 
 :root {
-  --bg-dark: #0b0f17;
-  --panel-bg: #111823;
-  --card-bg: #161e2c;
-  --card-border: #232d3f;
-  --border-color: #1e2736;
+  /* FM Deep Purple / Dark Theme Palette */
+  --bg-dark: #0f0a18;
+  --panel-bg: #171123;
+  --card-bg: #211932;
+  --card-hover: #2a203f;
+  --border-color: #32264a;
+  --border-light: #443463;
   
-  --text-main: #e2e8f0;
-  --text-muted: #8a99ad;
-  --text-light: #94a3b8;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
   
-  --accent-gold: #f59e0b;
-  --primary-blue: #2563eb;
-  --primary-blue-hover: #1d4ed8;
+  /* FM Colors */
+  --fm-purple: #8b5cf6;
+  --fm-purple-hover: #7c3aed;
+  --fm-cyan: #06b6d4;
+  --fm-cyan-dark: #0891b2;
+  --accent-gold: #fbbf24;
   
-  --stat-green: #10b981;
-  --stat-orange: #f59e0b;
-  --stat-cyan: #38bdf8;
-  --stat-red: #ef4444;
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
   
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'Courier New', Courier, monospace;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 * {
@@ -36,27 +41,50 @@ body {
   background-color: var(--bg-dark);
   color: var(--text-main);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   overflow-x: hidden;
   user-select: none;
 }
 
-/* --- App Layout --- */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* --- Emergency Mode (Kudeta > 75%) --- */
+body.emergency-mode {
+  animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.25); }
+  50% { box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.65); }
+  100% { box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.25); }
+}
+
+/* --- Main Layout App --- */
 .fm-app {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
-/* --- Top Navigation Bar --- */
+/* --- Top Navigation Bar khas Football Manager --- */
 .fm-topbar {
-  background-color: var(--panel-bg);
-  border-bottom: 1px solid var(--border-color);
-  padding: 0.75rem 1.25rem;
+  background: linear-gradient(180deg, #1f1631 0%, #171123 100%);
+  border-bottom: 2px solid var(--fm-purple);
+  padding: 0.6rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 20;
+}
+
+.fm-brand-container {
+  display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -67,131 +95,194 @@ body {
 }
 
 .fm-flag {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #fff;
+  font-size: 2.2rem;
   line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
 .fm-nation-title {
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   letter-spacing: 0.5px;
-  color: #ffffff;
+  color: #fff;
   text-transform: uppercase;
 }
 
 .fm-manager-title {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  color: var(--fm-cyan);
+  font-weight: 600;
 }
 
-/* --- Top Stat Boxes --- */
+/* FM Resource Strip Bar */
 .fm-top-stats {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
   align-items: center;
 }
 
 .fm-stat-box {
   background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 95px;
-  text-align: center;
+  min-width: 80px;
+  transition: all 0.2s ease;
+}
+
+.fm-stat-box:hover {
+  border-color: var(--border-light);
+  background-color: var(--card-hover);
+}
+
+.fm-stat-box.highlight-threat {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.fm-stat-box.highlight-food {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.fm-stat-box.highlight-pop {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .fm-stat-box .label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
   color: var(--text-muted);
   letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 2px;
 }
 
 .fm-stat-box .value {
-  font-weight: 800;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 0.88rem;
 }
 
-/* Warna spesifik stat baris atas */
-.stat-pop .value { color: #3b82f6; }
-.stat-kas .value { color: #10b981; }
-.stat-food .value { color: #10b981; }
-.stat-oil .value { color: #f59e0b; }
-.stat-coal .value { color: #38bdf8; }
-.stat-uranium .value { color: #ef4444; }
-
-.stat-coup {
-  border-color: rgba(239, 68, 68, 0.4);
+/* FM Continue Button Widget */
+.fm-continue-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--card-bg);
+  padding: 0.35rem 0.5rem 0.35rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
 }
-.stat-coup .label { color: #ef4444; }
-.stat-coup .value { color: #ef4444; }
 
-.stat-date .value {
-  color: #ffffff;
+.fm-date-display {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.fm-date-display .sub {
+  font-size: 0.6rem;
+  color: var(--text-muted);
   font-weight: 700;
 }
 
-/* --- Main Body Layout --- */
+.fm-date-display .main {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+}
+
+.fm-continue-btn {
+  background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1rem;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+}
+
+.fm-continue-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.fm-continue-btn:active {
+  transform: translateY(0);
+}
+
+/* --- Main App Body --- */
 .fm-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* --- Sidebar --- */
+/* --- Sidebar Navigation ala FM --- */
 .fm-sidebar {
   width: 230px;
   background-color: var(--panel-bg);
   border-right: 1px solid var(--border-color);
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
   overflow-y: auto;
 }
 
 .sidebar-category {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  color: var(--text-muted);
-  padding: 1rem 1.25rem 0.35rem;
+  color: var(--fm-purple);
+  padding: 0.8rem 1rem 0.3rem;
   letter-spacing: 1px;
-  text-transform: uppercase;
 }
 
 .fm-nav-btn {
   background: none;
   border: none;
-  color: var(--text-main);
-  padding: 0.65rem 1.25rem;
+  color: var(--text-muted);
+  padding: 0.6rem 1rem;
   text-align: left;
   font-family: var(--font-sans);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
 }
 
 .fm-nav-btn:hover {
-  background-color: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
+  background-color: var(--card-bg);
+  color: var(--text-main);
 }
 
 .fm-nav-btn.active {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: var(--accent-gold);
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, transparent 100%);
+  color: #fff;
+  border-left-color: var(--fm-purple);
+  font-weight: 700;
 }
 
-/* --- Content Area --- */
+.fm-nav-btn .icon {
+  font-size: 1rem;
+}
+
+/* --- Main Content Area --- */
 .fm-content {
   flex: 1;
   background-color: var(--bg-dark);
@@ -207,181 +298,291 @@ body {
   display: block;
 }
 
-/* --- Grid 2 Kolom untuk Kartu Dashboard --- */
+.fm-panel-header {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- Cards & Grid Layout --- */
 .fm-grid-2 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
 }
 
-/* --- Card Styles (Sesuai Gambar) --- */
+.fm-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
 .fm-card {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1.1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s ease;
+}
+
+.fm-card:hover {
+  border-color: var(--border-light);
+}
+
+.card-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--fm-cyan);
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  font-size: 0.82rem;
+}
+
+.divider-top {
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.5rem;
+}
+
+/* --- Progress Bars --- */
+.bar-bg {
+  background-color: var(--bg-dark);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+  border: 1px solid var(--border-color);
+}
+
+.bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bg-blue { background-color: var(--primary-color); }
+.bg-green { background-color: var(--success-color); }
+.bg-red { background-color: var(--danger-color); }
+.bg-warning { background-color: var(--warning-color); }
+
+/* --- Badges --- */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  display: inline-block;
+  font-family: var(--font-mono);
+}
+
+.bg-purple { background-color: var(--fm-purple); color: #fff; }
+.bg-secondary { background-color: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+/* --- Tables khas FM --- */
+.fm-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.fm-table th, .fm-table td {
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.fm-table th {
   background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.fm-card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-}
-
-.fm-card-desc {
-  font-size: 0.825rem;
   color: var(--text-muted);
-  margin-bottom: 1.25rem;
-  line-height: 1.4;
+  font-weight: 800;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.fm-card-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  margin-bottom: 0.5rem;
+.fm-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
-
-.fm-card-info .info-label {
-  color: var(--text-main);
-}
-
-.fm-card-info .info-value {
-  font-weight: 700;
-}
-
-.fm-card-info .info-value.blue { color: #60a5fa; }
-.fm-card-info .info-value.green { color: #10b981; }
-.fm-card-info .info-value.orange { color: #f59e0b; }
 
 /* --- Buttons --- */
 .btn {
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 0.85rem;
-  padding: 0.65rem 1rem;
-  border-radius: 6px;
+  font-size: 0.78rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 4px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  text-decoration: none;
+}
+
+.btn-xs {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.7rem;
 }
 
 .btn-primary {
-  background-color: var(--primary-blue);
-  color: #ffffff;
+  background-color: var(--fm-purple);
+  color: #fff;
 }
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-blue-hover);
-}
+.btn-primary:hover { background-color: var(--fm-purple-hover); }
 
 .btn-secondary {
-  background-color: #1a2332;
+  background-color: var(--card-bg);
   color: var(--text-main);
-  border: 1px solid var(--card-border);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover { 
+  background-color: var(--card-hover);
+  border-color: var(--border-light); 
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background-color: #222d3d;
+.btn-danger {
+  background-color: var(--danger-color);
+  color: #fff;
 }
+.btn-danger:hover { background-color: #dc2626; }
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: #000;
+}
+.btn-warning:hover { background-color: #d97706; }
 
 .btn-block {
-  width: 100%;
   display: block;
-  margin-top: 0.5rem;
+  width: 100%;
 }
 
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+/* --- Utilities Text --- */
+.text-success { color: var(--success-color); }
+.text-danger { color: var(--danger-color); }
+.text-warning { color: var(--warning-color); }
+.text-primary { color: #60a5fa; }
+.text-muted { color: var(--text-muted); }
+.text-center { text-align: center; }
 
-/* --- Badges & Utility --- */
-.badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
+.mt-2 { margin-top: 0.75rem; }
+.mb-2 { margin-bottom: 0.75rem; }
 
-.badge.bg-green {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: var(--stat-green);
-}
-
-.badge.bg-warning {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: var(--stat-orange);
-}
-
-.text-success { color: var(--stat-green); }
-.text-danger { color: var(--stat-red); }
-.text-warning { color: var(--stat-orange); }
-
-/* --- Modals & Toasts --- */
+/* --- Modals --- */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
 }
 
-.modal.hidden { display: none; }
+.modal.hidden {
+  display: none;
+}
 
 .modal-content {
   background-color: var(--panel-bg);
-  border: 1px solid var(--card-border);
+  border: 2px solid var(--fm-purple);
   border-radius: 8px;
   padding: 1.5rem;
-  max-width: 450px;
+  max-width: 480px;
   width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
 }
 
+.modal-header {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+/* --- Toast Container --- */
 .toast-container {
   position: fixed;
-  bottom: 1.25rem;
-  right: 1.25rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   z-index: 10000;
+  pointer-events: none;
 }
 
 .toast {
-  background-color: var(--card-bg);
-  border-left: 4px solid var(--accent-gold);
-  border-top: 1px solid var(--card-border);
-  border-right: 1px solid var(--card-border);
-  border-bottom: 1px solid var(--card-border);
+  background-color: var(--panel-bg);
+  border-left: 4px solid var(--fm-purple);
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 1rem;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  animation: slide-in 0.3s ease-out forwards;
 }
 
-/* Responsif untuk layar kecil */
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* --- Responsive Adjustments --- */
 @media (max-width: 1024px) {
-  .fm-grid-2 {
-    grid-template-columns: 1fr;
+  .fm-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .fm-continue-widget {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .fm-body {
+    flex-direction: column;
+  }
+  .fm-sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0.5rem;
+  }
+  .sidebar-category { display: none; }
+  .fm-nav-btn {
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+  .fm-nav-btn.active {
+    border-bottom-color: var(--fm-purple);
+    background: none;
   }
 }
