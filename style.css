@@ -117,6 +117,11 @@ body.emergency-mode {
   background: rgba(16, 185, 129, 0.08);
 }
 
+.fm-stat-box.highlight-pop {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.08);
+}
+
 .fm-stat-box .label {
   font-size: 0.65rem;
   font-weight: 700;
