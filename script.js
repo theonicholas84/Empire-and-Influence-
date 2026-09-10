@@ -1,5 +1,5 @@
 /* ===================================================
-   URZIKSTAN — State Manager Engine (Expanded Resources & Roads)
+   URZIKSTAN — State Manager Engine (Victoria Mechanics)
    =================================================== */
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
@@ -20,9 +20,10 @@ const INITIAL_STATE = {
   oilStock: 1000,         // Minyak Mentah (Barel)
   coalStock: 500,         // Batubara (Ton)
   uraniumStock: 0,        // Uranium (Ton)
+  foodStock: 2000,        // Resources Makanan (Ton) NEW!
 
   oilLevel: 1,
-  roadLevel: 0,           // 0: Tanah, 1: Raya, 2: Tol
+  roadLevel: 0,           
   exportActive: true,
   oilPricePerBarrel: 80,
   
@@ -41,12 +42,15 @@ const INITIAL_STATE = {
 
   // --- Bangunan & Infrastruktur ---
   buildings: {
-    farms: 0,
+    farms: 1,             // Minimal 1 Farm awal untuk suplai makanan
     banks: 0,
     schools: 0,
     coalMines: 0,
     garrisons: 0
   },
+
+  // --- Anggaran & Kebijakan Subsidi ---
+  subsidyRate: 10000000, // Subsidi Rakyat per detik ($10M)
 
   blackMarketActive: false,
   ministers: {
@@ -62,8 +66,8 @@ const INITIAL_STATE = {
 let game = JSON.parse(JSON.stringify(INITIAL_STATE));
 
 function formatMoney(val) {
-  if (val >= 1e9) return "$" + (val / 1e9).toFixed(2) + "B";
-  if (val >= 1e6) return "$" + (val / 1e6).toFixed(1) + "M";
+  if (Math.abs(val) >= 1e9) return "$" + (val / 1e9).toFixed(2) + "B";
+  if (Math.abs(val) >= 1e6) return "$" + (val / 1e6).toFixed(1) + "M";
   return "$" + Math.floor(val).toLocaleString();
 }
 
@@ -97,7 +101,7 @@ function gameLoop() {
   // 1. Logistik & Bonus Jalan
   const roadBonus = ROAD_TIERS[game.roadLevel].bonus;
 
-  // 2. Produksi Komoditas
+  // 2. Produksi Komoditas & Resources Makanan (NEW)
   const oilProducedPerSec = (game.oilLevel * 100) * (1 + roadBonus);
   game.oilStock += oilProducedPerSec * elapsed;
 
@@ -105,14 +109,26 @@ function gameLoop() {
     game.coalStock += (game.buildings.coalMines * 10) * elapsed;
   }
 
-  // 3. Kalkulasi Pajak & Deviden Bank
+  // Produksi & Konsumsi Makanan
+  const foodProduction = (game.buildings.farms * 150) * elapsed; // 150 Ton per Farm
+  const foodConsumption = 80 * elapsed;                          // Konsumsi populasi
+  game.foodStock = Math.max(0, game.foodStock + foodProduction - foodConsumption);
+
+  // Penalti Krisis Pangan
+  let foodImpact = 0;
+  if (game.foodStock <= 0) {
+    foodImpact = -1.5; // Penalti berat ke kepuasan rakyat
+    showToast("⚠️ KRISIS PANGAN! Stok makanan habis!");
+  }
+
+  // 3. MEKANIK VICTORIA: REVENUE (PENDAPATAN)
   let baseTax = 2000000;
   let taxMultiplier = 1;
   let taxPublicImpact = 0;
 
   if (game.taxRateSetting === "low") {
     taxMultiplier = 0.5;
-    taxPublicImpact = 0.1;
+    taxPublicImpact = 0.2;
   } else if (game.taxRateSetting === "medium") {
     taxMultiplier = 1.0;
     taxPublicImpact = 0;
@@ -125,30 +141,40 @@ function gameLoop() {
   }
 
   const bankDeviden = game.buildings.banks * 2500000;
-  const totalTaxIncome = ((baseTax * taxMultiplier) + bankDeviden) * (1 + roadBonus);
+  const monthlyRevenue = ((baseTax * taxMultiplier) + bankDeviden) * (1 + roadBonus);
 
-  // 4. Sistem Ekspor Minyak Mentah (Minyak -> Dollar)
+  // Ekspor Minyak Mentah (Dianggap Devisa Revenue)
   let autoExportIncome = 0;
   if (game.exportActive && game.oilStock > 0) {
-    let exportRate = Math.min(game.oilStock, 80 * elapsed); // Max ekspor per dtk
+    let exportRate = Math.min(game.oilStock, 80 * elapsed);
     if (game.unSanctions < 100 || game.blackMarketActive) {
       const pricePenalty = game.blackMarketActive ? 0.5 : (1 - (game.unSanctions / 100));
       const revenue = exportRate * game.oilPricePerBarrel * pricePenalty * 1000;
-      
       game.oilStock -= exportRate;
-      autoExportIncome = revenue;
+      autoExportIncome = revenue / elapsed; // Normalized per sec
     }
   }
 
-  // Tambahkan devisa Dollar ke Kas
-  game.treasury += (totalTaxIncome + autoExportIncome) * elapsed;
+  const yearlyRevenueAmortized = (autoExportIncome * 0.3); // Devisa ekspor jangka panjang
+  const totalRevenuePerSec = monthlyRevenue + yearlyRevenueAmortized;
 
-  // 5. Efek Bangunan Pertanian, Sekolah, dan Militer
-  game.loyaltyPeople = Math.min(100, Math.max(0, game.loyaltyPeople + (taxPublicImpact * elapsed) + (game.buildings.farms * 0.3 * elapsed)));
+  // 4. MEKANIK VICTORIA: STRUCTURAL EXPENSES (PENGELUARAN)
+  const expSubsidy = game.subsidyRate;
+  const expSekolah = (game.buildings.schools * 3000000) + (game.buildings.garrisons * 5000000);
+  const expMakananLogistik = (game.buildings.farms * 2000000); // Biaya perawatan irigasi/logistik
+  
+  const totalExpensesPerSec = expSubsidy + expSekolah + expMakananLogistik;
+
+  // 5. NERACA NET BALANCE
+  const netBalancePerSec = totalRevenuePerSec - totalExpensesPerSec;
+  game.treasury += netBalancePerSec * elapsed;
+
+  // 6. Efek Bangunan & Kepuasan Rakyat
+  game.loyaltyPeople = Math.min(100, Math.max(0, game.loyaltyPeople + (taxPublicImpact * elapsed) + (game.buildings.farms * 0.2 * elapsed) + (foodImpact * elapsed)));
   game.cultOfPersonality = Math.min(100, Math.max(0, game.cultOfPersonality + (game.buildings.schools * 0.15 * elapsed)));
   game.loyaltyMilitary = Math.min(100, Math.max(0, game.loyaltyMilitary + (game.buildings.garrisons * 0.3 * elapsed)));
 
-  // 6. Resiko Kudeta
+  // 7. Resiko Kudeta
   let threatGain = 0;
   if (game.loyaltyMilitary < 40) threatGain += 2.0;
   if (game.loyaltyPeople < 30) threatGain += 3.0;
@@ -178,7 +204,7 @@ function gameLoop() {
     return;
   }
 
-  updateUI(totalTaxIncome, autoExportIncome, oilProducedPerSec);
+  updateUI(monthlyRevenue, yearlyRevenueAmortized, totalRevenuePerSec, expSubsidy, expSekolah, expMakananLogistik, totalExpensesPerSec, netBalancePerSec, oilProducedPerSec);
 }
 
 // --- Dynamic Events ---
@@ -277,7 +303,16 @@ function initEventListeners() {
     if (game.treasury >= 40000000) {
       game.treasury -= 40000000;
       game.buildings.farms++;
-      showToast("🌾 Ladang pertanian dibuka!");
+      showToast("🌾 Ladang pertanian dibuka! Suplai makanan bertambah.");
+    } else showToast("❌ Dana tidak cukup!");
+  };
+
+  // Beli Impor Makanan Darurat
+  document.getElementById("btn-buy-food").onclick = () => {
+    if (game.treasury >= 20000000) {
+      game.treasury -= 20000000;
+      game.foodStock += 1000;
+      showToast("🍞 Berhasil mengimpor 1.000 Ton Makanan!");
     } else showToast("❌ Dana tidak cukup!");
   };
 
@@ -460,13 +495,13 @@ function triggerGameOver(reason) {
 function resetGame() {
   game = JSON.parse(JSON.stringify(INITIAL_STATE));
   document.getElementById("gameover-modal").classList.add("hidden");
-  updateUI(0, 0, 0);
 }
 
 // Sync UI Realtime
-function updateUI(calculatedTax = 0, autoExportIncome = 0, oilRate = 0) {
+function updateUI(mRev=0, yRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totExp=0, netBal=0, oilRate=0) {
   document.getElementById("top-date").innerText = `${Math.floor(game.day)} ${MONTHS[game.monthIndex]} ${game.year}`;
   document.getElementById("top-treasury").innerText = formatMoney(game.treasury);
+  document.getElementById("top-food").innerText = `${Math.floor(game.foodStock).toLocaleString()} Ton`; // TOP FOOD
   document.getElementById("top-oil").innerText = `${Math.floor(game.oilStock).toLocaleString()} Bbl`;
   document.getElementById("top-coal").innerText = `${Math.floor(game.coalStock).toLocaleString()} Ton`;
   document.getElementById("top-uranium").innerText = `${Math.floor(game.uraniumStock).toLocaleString()} Ton`;
@@ -501,16 +536,27 @@ function updateUI(calculatedTax = 0, autoExportIncome = 0, oilRate = 0) {
   document.getElementById("bld-garrison-lvl").innerText = game.buildings.garrisons;
   document.getElementById("bank-income-txt").innerText = `+$${((game.buildings.banks * 2.5)).toFixed(1)}M / dtk`;
 
-  // Updates Ekonomi & Ekspor
+  // Updates Finansial Victoria Engine
+  document.getElementById("vic-rev-bulan").innerText = formatMoney(mRev) + " / dtk";
+  document.getElementById("vic-rev-tahun").innerText = formatMoney(yRev) + " / dtk";
+  document.getElementById("vic-rev-total").innerText = formatMoney(totRev) + " / dtk";
+
+  document.getElementById("vic-exp-subsidi").innerText = formatMoney(expSub) + " / dtk";
+  document.getElementById("vic-exp-sekolah").innerText = formatMoney(expSek) + " / dtk";
+  document.getElementById("vic-exp-makanan").innerText = formatMoney(expFood) + " / dtk";
+  document.getElementById("vic-exp-total").innerText = formatMoney(totExp) + " / dtk";
+
+  const netEl = document.getElementById("vic-net-balance");
+  netEl.innerText = formatMoney(netBal) + " / dtk";
+  netEl.className = netBal >= 0 ? "value text-success" : "value text-danger";
+
   let taxLabel = "Sedang (15%)";
   if (game.taxRateSetting === "low") taxLabel = "Rendah (5%)";
   if (game.taxRateSetting === "high") taxLabel = "Tinggi (30%)";
   if (game.taxRateSetting === "extreme") taxLabel = "Ekstrem (50%)";
   document.getElementById("tax-rate-label").innerText = taxLabel;
-  document.getElementById("tax-income-txt").innerText = `+$${(calculatedTax / 1e6).toFixed(1)}M / dtk`;
 
   document.getElementById("oil-stock-txt").innerText = `${Math.floor(game.oilStock).toLocaleString()} Barel`;
-  document.getElementById("export-revenue-txt").innerText = `+$${(autoExportIncome / 1e6).toFixed(1)}M / dtk`;
 
   document.getElementById("un-sanctions-text").innerText = `${Math.floor(game.unSanctions)}%`;
   document.getElementById("bar-sanctions").style.width = `${game.unSanctions}%`;
@@ -535,5 +581,4 @@ function updateUI(calculatedTax = 0, autoExportIncome = 0, oilRate = 0) {
 window.onload = () => {
   initEventListeners();
   setInterval(gameLoop, 1000);
-  updateUI(0, 0, 0);
 };
