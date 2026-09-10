@@ -15,12 +15,19 @@ const INITIAL_STATE = {
   monthIndex: 0,
   year: 1960,
   
+  // --- Demografi & Populasi Engine ---
+  populationTotal: 4620000,
+  popPolicy: "natural", // natural, encourage, restrict
+  monthlyBirths: 0,
+  monthlyDeaths: 0,
+  monthlyNetGrowth: 0,
+
   // --- Resource Engine ---
   treasury: 100000000,    // Dollar ($)
   oilStock: 1000,         // Minyak Mentah (Barel)
   coalStock: 500,         // Batubara (Ton)
   uraniumStock: 0,        // Uranium (Ton)
-  foodStock: 2000,        // Resources Makanan (Ton) NEW!
+  foodStock: 2000,        // Resources Makanan (Ton)
 
   oilLevel: 1,
   roadLevel: 0,           
@@ -71,6 +78,11 @@ function formatMoney(val) {
   return "$" + Math.floor(val).toLocaleString();
 }
 
+function formatPop(val) {
+  if (val >= 1e6) return (val / 1e6).toFixed(2) + "M";
+  return Math.floor(val).toLocaleString();
+}
+
 function showToast(msg) {
   const container = document.getElementById("toast-container");
   if (!container) return;
@@ -79,6 +91,43 @@ function showToast(msg) {
   toast.innerText = msg;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+
+// --- Dynamic Population Calculation ---
+function processMonthlyPopulation() {
+  const pop = game.populationTotal;
+  
+  // Laju kelahiran dasar (misal ~1.2% per bulan)
+  let birthRate = 0.0025; 
+  let deathRate = 0.0015;
+
+  // Modifikasi Kebijakan Populasi
+  if (game.popPolicy === "encourage") birthRate += 0.0015; 
+  if (game.popPolicy === "restrict") {
+    birthRate -= 0.0008;
+    deathRate -= 0.0002; // Emigrasi tertahan
+  }
+
+  // Modifikasi Pajak & Kepuasan (Pajak tinggi = emigrasi naik)
+  if (game.taxRateSetting === "low") birthRate += 0.0005;
+  if (game.taxRateSetting === "high") deathRate += 0.0008; // Emigrasi karena pajak
+  if (game.taxRateSetting === "extreme") deathRate += 0.0025; // Keluar negeri massal
+
+  // Dampak Makanan (Kelaparan meningkatkan kematian secara drastis)
+  if (game.foodStock <= 0) {
+    deathRate += 0.0050; // Kematian tinggi akibat krisis pangan
+  }
+
+  // Dampak Kerusuhan / Kudeta
+  if (game.coupThreat > 50) {
+    deathRate += 0.0010;
+  }
+
+  game.monthlyBirths = Math.floor(pop * birthRate);
+  game.monthlyDeaths = Math.floor(pop * deathRate);
+  game.monthlyNetGrowth = game.monthlyBirths - game.monthlyDeaths;
+
+  game.populationTotal = Math.max(100000, game.populationTotal + game.monthlyNetGrowth);
 }
 
 // --- Game Loop Utama ---
@@ -92,6 +141,10 @@ function gameLoop() {
   if (game.day >= 30) {
     game.day = 1;
     game.monthIndex++;
+    
+    // Eksekusi siklus dinamika kependudukan per bulan
+    processMonthlyPopulation();
+
     if (game.monthIndex >= 12) {
       game.monthIndex = 0;
       game.year++;
@@ -101,7 +154,7 @@ function gameLoop() {
   // 1. Logistik & Bonus Jalan
   const roadBonus = ROAD_TIERS[game.roadLevel].bonus;
 
-  // 2. Produksi Komoditas & Resources Makanan (NEW)
+  // 2. Produksi Komoditas & Resources Makanan
   const oilProducedPerSec = (game.oilLevel * 100) * (1 + roadBonus);
   game.oilStock += oilProducedPerSec * elapsed;
 
@@ -109,20 +162,20 @@ function gameLoop() {
     game.coalStock += (game.buildings.coalMines * 10) * elapsed;
   }
 
-  // Produksi & Konsumsi Makanan
-  const foodProduction = (game.buildings.farms * 150) * elapsed; // 150 Ton per Farm
-  const foodConsumption = 80 * elapsed;                          // Konsumsi populasi
+  // Produksi & Konsumsi Makanan (Berpengaruh dari Jumlah Populasi)
+  const foodProduction = (game.buildings.farms * 150) * elapsed; 
+  const foodConsumption = (game.populationTotal / 50000) * elapsed; // Konsumsi bertambah seiring populasi
   game.foodStock = Math.max(0, game.foodStock + foodProduction - foodConsumption);
 
   // Penalti Krisis Pangan
   let foodImpact = 0;
   if (game.foodStock <= 0) {
-    foodImpact = -1.5; // Penalti berat ke kepuasan rakyat
-    showToast("⚠️ KRISIS PANGAN! Stok makanan habis!");
+    foodImpact = -1.5;
   }
 
   // 3. MEKANIK VICTORIA: REVENUE (PENDAPATAN)
-  let baseTax = 2000000;
+  // Base Tax dihitung dari rasio populasi
+  let baseTax = (game.populationTotal / 4620000) * 2000000;
   let taxMultiplier = 1;
   let taxPublicImpact = 0;
 
@@ -141,7 +194,7 @@ function gameLoop() {
   }
 
   const bankDeviden = game.buildings.banks * 2500000;
-  const monthlyRevenue = ((baseTax * taxMultiplier) + bankDeviden) * (1 + roadBonus);
+  const monthlyTaxRevenue = (baseTax * taxMultiplier) * (1 + roadBonus);
 
   // Ekspor Minyak Mentah (Dianggap Devisa Revenue)
   let autoExportIncome = 0;
@@ -151,17 +204,18 @@ function gameLoop() {
       const pricePenalty = game.blackMarketActive ? 0.5 : (1 - (game.unSanctions / 100));
       const revenue = exportRate * game.oilPricePerBarrel * pricePenalty * 1000;
       game.oilStock -= exportRate;
-      autoExportIncome = revenue / elapsed; // Normalized per sec
+      autoExportIncome = revenue / elapsed;
     }
   }
 
-  const yearlyRevenueAmortized = (autoExportIncome * 0.3); // Devisa ekspor jangka panjang
-  const totalRevenuePerSec = monthlyRevenue + yearlyRevenueAmortized;
+  const totalRevenuePerSec = monthlyTaxRevenue + bankDeviden + autoExportIncome;
 
   // 4. MEKANIK VICTORIA: STRUCTURAL EXPENSES (PENGELUARAN)
-  const expSubsidy = game.subsidyRate;
+  let expSubsidy = game.subsidyRate;
+  if (game.popPolicy === "encourage") expSubsidy += 5000000; // Extra biaya insentif kelahiran
+
   const expSekolah = (game.buildings.schools * 3000000) + (game.buildings.garrisons * 5000000);
-  const expMakananLogistik = (game.buildings.farms * 2000000); // Biaya perawatan irigasi/logistik
+  const expMakananLogistik = (game.buildings.farms * 2000000); 
   
   const totalExpensesPerSec = expSubsidy + expSekolah + expMakananLogistik;
 
@@ -204,7 +258,18 @@ function gameLoop() {
     return;
   }
 
-  updateUI(monthlyRevenue, yearlyRevenueAmortized, totalRevenuePerSec, expSubsidy, expSekolah, expMakananLogistik, totalExpensesPerSec, netBalancePerSec, oilProducedPerSec);
+  updateUI(
+    monthlyTaxRevenue, 
+    bankDeviden, 
+    autoExportIncome, 
+    totalRevenuePerSec, 
+    expSubsidy, 
+    expSekolah, 
+    expMakananLogistik, 
+    totalExpensesPerSec, 
+    netBalancePerSec, 
+    oilProducedPerSec
+  );
 }
 
 // --- Dynamic Events ---
@@ -263,6 +328,14 @@ function setTaxRate(rate) {
   if (rate === "high") label = "Tinggi (30%)";
   if (rate === "extreme") label = "Ekstrem (50%)";
   showToast(`📜 Tarif pajak diubah ke: ${label}`);
+}
+
+function setPopPolicy(pol) {
+  game.popPolicy = pol;
+  let label = "Pertumbuhan Alami";
+  if (pol === "encourage") label = "Program Insentif Kelahiran";
+  if (pol === "restrict") label = "Pembatasan Imigrasi/Emigrasi";
+  showToast(`👥 Kebijakan Populasi diubah ke: ${label}`);
 }
 
 function initEventListeners() {
@@ -498,10 +571,11 @@ function resetGame() {
 }
 
 // Sync UI Realtime
-function updateUI(mRev=0, yRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totExp=0, netBal=0, oilRate=0) {
+function updateUI(pajakRev=0, bankRev=0, minyakRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totExp=0, netBal=0, oilRate=0) {
   document.getElementById("top-date").innerText = `${Math.floor(game.day)} ${MONTHS[game.monthIndex]} ${game.year}`;
+  document.getElementById("top-population").innerText = formatPop(game.populationTotal);
   document.getElementById("top-treasury").innerText = formatMoney(game.treasury);
-  document.getElementById("top-food").innerText = `${Math.floor(game.foodStock).toLocaleString()} Ton`; // TOP FOOD
+  document.getElementById("top-food").innerText = `${Math.floor(game.foodStock).toLocaleString()} Ton`;
   document.getElementById("top-oil").innerText = `${Math.floor(game.oilStock).toLocaleString()} Bbl`;
   document.getElementById("top-coal").innerText = `${Math.floor(game.coalStock).toLocaleString()} Ton`;
   document.getElementById("top-uranium").innerText = `${Math.floor(game.uraniumStock).toLocaleString()} Ton`;
@@ -515,6 +589,26 @@ function updateUI(mRev=0, yRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totEx
 
   document.getElementById("val-cult").innerText = `${Math.floor(game.cultOfPersonality)}%`;
   document.getElementById("bar-cult").style.width = `${game.cultOfPersonality}%`;
+
+  // Status Populasi Panel Pops
+  document.getElementById("pop-total-val").innerText = `${Math.floor(game.populationTotal).toLocaleString()} Jiwa`;
+  
+  const netGrowthEl = document.getElementById("pop-net-growth");
+  netGrowthEl.innerText = `${game.monthlyNetGrowth >= 0 ? '+' : ''}${game.monthlyNetGrowth.toLocaleString()} Jiwa/bln`;
+  netGrowthEl.className = game.monthlyNetGrowth >= 0 ? "text-success" : "text-danger";
+
+  document.getElementById("pop-birth-rate").innerText = `+${game.monthlyBirths.toLocaleString()}`;
+  document.getElementById("pop-death-rate").innerText = `-${game.monthlyDeaths.toLocaleString()}`;
+
+  let polLabel = "Normal (Alami)";
+  if (game.popPolicy === "encourage") polLabel = "Program Kelahiran";
+  if (game.popPolicy === "restrict") polLabel = "Pembatasan Ketat";
+  document.getElementById("pop-policy-label").innerText = polLabel;
+
+  // Distribusi Faksi Populasi
+  document.getElementById("pop-mil-count").innerText = formatPop(game.populationTotal * 0.025);
+  document.getElementById("pop-peo-count").innerText = formatPop(game.populationTotal * 0.735);
+  document.getElementById("pop-rel-count").innerText = formatPop(game.populationTotal * 0.24);
 
   document.getElementById("pop-mil-sat").innerText = `${Math.floor(game.loyaltyMilitary)}%`;
   document.getElementById("pop-peo-sat").innerText = `${Math.floor(game.loyaltyPeople)}%`;
@@ -537,8 +631,9 @@ function updateUI(mRev=0, yRev=0, totRev=0, expSub=0, expSek=0, expFood=0, totEx
   document.getElementById("bank-income-txt").innerText = `+$${((game.buildings.banks * 2.5)).toFixed(1)}M / dtk`;
 
   // Updates Finansial Victoria Engine
-  document.getElementById("vic-rev-bulan").innerText = formatMoney(mRev) + " / dtk";
-  document.getElementById("vic-rev-tahun").innerText = formatMoney(yRev) + " / dtk";
+  document.getElementById("vic-rev-pajak").innerText = formatMoney(pajakRev) + " / dtk";
+  document.getElementById("vic-rev-bank").innerText = formatMoney(bankRev) + " / dtk";
+  document.getElementById("vic-rev-minyak").innerText = formatMoney(minyakRev) + " / dtk";
   document.getElementById("vic-rev-total").innerText = formatMoney(totRev) + " / dtk";
 
   document.getElementById("vic-exp-subsidi").innerText = formatMoney(expSub) + " / dtk";
