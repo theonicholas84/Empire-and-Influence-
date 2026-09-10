@@ -47,8 +47,12 @@
       <!-- Top Resources Indicator Bar -->
       <div class="fm-top-stats">
         <div class="fm-stat-box">
-          <span class="label">KAS (DOLLAR)</span>
+          <span class="label">KAS (TREASURY)</span>
           <span class="value text-success" id="top-treasury">$100M</span>
+        </div>
+        <div class="fm-stat-box highlight-food">
+          <span class="label">MAKANAN</span>
+          <span class="value text-success" id="top-food">2,000 Ton</span>
         </div>
         <div class="fm-stat-box">
           <span class="label">STOK MINYAK</span>
@@ -78,7 +82,7 @@
         <div class="sidebar-category">RINGKASAN</div>
         <button class="fm-nav-btn active" data-tab="overview">📊 Ikhtisar Negara</button>
         <button class="fm-nav-btn" data-tab="buildings">🏗️ Pembangunan & Kota</button>
-        <button class="fm-nav-btn" data-tab="economy">💰 Pajak & Ekspor</button>
+        <button class="fm-nav-btn" data-tab="economy">💰 Revenue & Finance (Victoria)</button>
         <button class="fm-nav-btn" data-tab="pops">👥 Populasi & Faksi (Pops)</button>
 
         <div class="sidebar-category">KEBIJAKAN</div>
@@ -195,15 +199,16 @@
               <button class="btn btn-primary btn-block mt-2" id="btn-upgrade-road">Upgrade Jalan ($80M)</button>
             </div>
 
-            <!-- PERTANIAN (FARM) -->
+            <!-- PERTANIAN (FARM) & LOGISTIK MAKANAN -->
             <div class="fm-card">
-              <h4>🌾 Pertanian & Kolektif Pangan (Farm)</h4>
-              <p class="text-muted mt-2">Menjamin ketahanan pangan rakyat. Secara bertahap menaikkan kepuasan rakyat (+0.3%/dtk per unit).</p>
+              <h4>🌾 Pertanian & Resources Makanan (Farm)</h4>
+              <p class="text-muted mt-2">Menyuplai bahan pangan rakyat. Mencegah krisis kelaparan & menaikkan kepuasan rakyat.</p>
               <div class="stat-row mt-2">
                 <span>Jumlah Ladang:</span>
-                <span id="bld-farm-lvl" class="text-success">0</span>
+                <span id="bld-farm-lvl" class="text-success">1</span>
               </div>
               <button class="btn btn-primary btn-block mt-2" id="btn-build-farm">Bangun Ladang Pertanian ($40M)</button>
+              <button class="btn btn-secondary btn-block mt-2" id="btn-buy-food">Impor Pangan Emergency ($20M / 1,000 Ton)</button>
             </div>
 
             <!-- BANK NASIONAL -->
@@ -256,12 +261,53 @@
           </div>
         </section>
 
-        <!-- TAB 3: ECONOMY & TAXES -->
+        <!-- TAB 3: ECONOMY & VICTORIA FINANCE -->
         <section id="tab-economy" class="tab-content">
-          <div class="fm-panel-header">MANAJEMEN PERPAJAKAN & PERDAGANGAN KOMODITAS</div>
+          <div class="fm-panel-header">SISTEM KEUANGAN & BALANCE NERACA (MEKANIK VICTORIA)</div>
           
           <div class="fm-grid-2">
-            <!-- PENGATURAN PAJAK -->
+            <!-- REVENUE & EXPENSES PANEL (VICTORIA) -->
+            <div class="fm-card">
+              <div class="card-title text-success">📈 REVENUE (PENDAPATAN)</div>
+              <div class="stat-row mt-2">
+                <span>Revenue Bulanan (Pajak + Bank):</span>
+                <span id="vic-rev-bulan" class="text-success">$2.0M / dtk</span>
+              </div>
+              <div class="stat-row mt-2">
+                <span>Revenue Tahunan (Amortisasi Devisa):</span>
+                <span id="vic-rev-tahun" class="text-success">$0.0M / dtk</span>
+              </div>
+              <div class="stat-row mt-2" style="border-top: 1px solid #283245; padding-top: 5px;">
+                <strong>TOTAL REVENUE:</strong>
+                <strong id="vic-rev-total" class="text-success">$2.0M / dtk</strong>
+              </div>
+
+              <div class="card-title text-danger mt-2" style="margin-top: 1.5rem;">📉 EXPENSES (PENGELUARAN)</div>
+              <div class="stat-row mt-2">
+                <span>Subsidi (Siswa/Rakyat):</span>
+                <span id="vic-exp-subsidi" class="text-danger">$10.0M / dtk</span>
+              </div>
+              <div class="stat-row mt-2">
+                <span>Operasional Sekolah & Garis:</span>
+                <span id="vic-exp-sekolah" class="text-danger">$0.0M / dtk</span>
+              </div>
+              <div class="stat-row mt-2">
+                <span>Logistik Makanan (Perawatan Farm):</span>
+                <span id="vic-exp-makanan" class="text-danger">$2.0M / dtk</span>
+              </div>
+              <div class="stat-row mt-2" style="border-top: 1px solid #283245; padding-top: 5px;">
+                <strong>TOTAL PENGELUARAN:</strong>
+                <strong id="vic-exp-total" class="text-danger">$12.0M / dtk</strong>
+              </div>
+
+              <!-- NERACA / BALANCE -->
+              <div class="fm-stat-box mt-2 text-center" style="padding: 1rem; background: #0B0E14;">
+                <span class="label">NET BALANCE (SURPLUS / DEFISIT)</span>
+                <span class="value text-danger" id="vic-net-balance" style="font-size: 1.2rem;">-$10.0M / dtk</span>
+              </div>
+            </div>
+
+            <!-- PENGATURAN PAJAK & PERDAGANGAN -->
             <div class="fm-card">
               <div class="card-title">KEBIJAKAN TARIF PAJAK NASIONAL</div>
               <p class="text-muted">Atur besaran pemajakan pada rakyat dan pelaku usaha untuk mendanai negara.</p>
@@ -270,10 +316,6 @@
                 <span>Tarif Pajak Saat Ini:</span>
                 <span id="tax-rate-label" class="text-warning">Sedang (15%)</span>
               </div>
-              <div class="stat-row">
-                <span>Pendapatan Pajak Bersih:</span>
-                <span id="tax-income-txt" class="text-success">+$5.0M / dtk</span>
-              </div>
               
               <div class="tax-options-grid mt-2">
                 <button class="btn btn-secondary btn-block mt-2" onclick="setTaxRate('low')">Pajak Rendah (5%) <small>- Stabil / Suka</small></button>
@@ -281,24 +323,11 @@
                 <button class="btn btn-secondary btn-block mt-2" onclick="setTaxRate('high')">Pajak Tinggi (30%) <small>- Unrest +1</small></button>
                 <button class="btn btn-danger btn-block mt-2" onclick="setTaxRate('extreme')">Pajak Ekstrem (50%) <small>- Kudeta Cepat!</small></button>
               </div>
-            </div>
 
-            <!-- PASAR EKSPOR MINYAK & ASET -->
-            <div class="fm-card">
-              <div class="card-title">SISTEM PERDAGANGAN MINYAK & SUMBER DAYA</div>
-              <p class="text-muted">Minyak mentah di gudang harus dijual/diekspor ke pasar global untuk menghasilkan Dollar.</p>
-              
+              <div class="card-title mt-2" style="margin-top: 1.5rem;">PERDAGANGAN MINYAK & ASET</div>
               <div class="stat-row mt-2">
                 <span>Stok Minyak Mentah:</span>
-                <span id="oil-stock-txt" class="text-warning">1.000 Bbl</span>
-              </div>
-              <div class="stat-row">
-                <span>Harga Minyak Global:</span>
-                <span id="oil-price-txt" class="text-success">$80 / Barel</span>
-              </div>
-              <div class="stat-row">
-                <span>Pendapatan Ekspor (Otomatis):</span>
-                <span id="export-revenue-txt" class="text-success">+$0.0M / dtk</span>
+                <span id="oil-stock-txt" class="text-warning">1.000 Barel</span>
               </div>
 
               <div class="mt-2">
